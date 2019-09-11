@@ -5,5 +5,5 @@
 -------
 
 ```
-composer require --prefer-dist kaykay012/migration 
+composer require --prefer-dist kaykay012/laravel-gii 
 ```
