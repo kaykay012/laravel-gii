@@ -8,7 +8,7 @@ use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Support\Facades\DB;
 
-class CurdMakeCommand extends GeneratorCommand
+class ControllerMakeCommand extends GeneratorCommand
 {
 
     /**
@@ -16,7 +16,7 @@ class CurdMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $name = 'make:curd';
+    protected $name = 'make:controller';
 
     /**
      * The console command description.
