@@ -1,7 +1,7 @@
 {
     "name": "kaykay012/laravel-gii",
     "description": "类似于yii2 的Gii工具,可以创建CURD逻辑及验证规则",
-    "type": "yii2-extension",
+    "type": "laravel-extension",
     "keywords": ["laravel", "crud", "gii", "rules"],
     "license": "MIT", 
     "authors": [
