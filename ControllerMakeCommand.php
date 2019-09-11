@@ -16,7 +16,7 @@ class ControllerMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $name = 'make:curd';
+    protected $name = 'make:controller';
 
     /**
      * The console command description.
