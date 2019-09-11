@@ -8,7 +8,7 @@ use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Support\Facades\DB;
 
-class ControllerMakeCommand extends GeneratorCommand
+class CurdMakeCommand extends GeneratorCommand
 {
 
     /**
