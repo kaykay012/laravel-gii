@@ -19,7 +19,7 @@
     },
     "autoload": {
         "psr-4": {
-            "kaykay012\\laravelgii\\": ""
+            "Illuminate\\Routing\\Console\\": ""
         }
     }
 }
