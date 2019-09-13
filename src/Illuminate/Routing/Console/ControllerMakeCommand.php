@@ -1,6 +1,6 @@
 <?php
 
-namespace Illuminate\Routing\Console;
+namespace App\Console\Commands\Gii;
 
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -16,7 +16,7 @@ class ControllerMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $name = 'make:controller';
+    protected $name = 'make:curd';
 
     /**
      * The console command description.
