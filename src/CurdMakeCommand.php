@@ -43,6 +43,7 @@ class CurdMakeCommand extends GeneratorCommand
         if ($this->option('parent')) {
             return $path . '/stubs/controller.nested.stub';
         } elseif ($this->option('model')) {
+            dd('a');
             return __DIR__ . '/stubs/controller.model.stub';
         } elseif ($this->option('resource')) {
             return $path . '/stubs/controller.stub';
