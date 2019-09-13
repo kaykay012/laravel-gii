@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands\Gii;
+namespace App\Console\Commands;
 
 use Illuminate\Support\Str;
 use InvalidArgumentException;
