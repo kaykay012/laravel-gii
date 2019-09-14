@@ -21,5 +21,12 @@
         "psr-4": {
             "kaykay012\\laravelgii\\": ""
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "kaykay012\\laravelgii\\ServiceProvider"
+            ]
+        }
     }
 }
