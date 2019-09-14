@@ -40,7 +40,23 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected function buildClass($name)
     {
-        $table = $this->getTable($name);
+        if ($this->option('table')) {
+            $table = $this->option('table');
+        }else{
+            $table = $this->getTable($name);
+        }
+        
+        do{
+            $exists = $this->existsTable($table);
+            if (!$exists) {
+                $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or continue generate it.", $table);                
+            }
+            if($tableAsk === $table){
+                $exists = true;
+            }else{
+                $table = $tableAsk;
+            }
+        }while($exists === null && $table !== false);
         
         $replace['DummyTableName'] = $table;
         
@@ -77,7 +93,7 @@ class ModelMakeCommand extends GeneratorCommand
         if ($this->option('migration')) {
             $this->createMigration();
         }
-
+        
         if ($this->option('controller') || $this->option('resource')) {
             $this->createController();
         }
@@ -174,16 +190,22 @@ class ModelMakeCommand extends GeneratorCommand
             ['pivot', 'p', InputOption::VALUE_NONE, 'Indicates if the generated model should be a custom intermediate table model.'],
 
             ['resource', 'r', InputOption::VALUE_NONE, 'Indicates if the generated controller should be a resource controller.'],
+            
+            ['table', 't', InputOption::VALUE_OPTIONAL, 'Generate the model with table name.'],
         ];
     }
     
     protected function buildRulesReplacements(array $replace, $table)
     {
         $columns = CommonClass::getColumns($table);
+        $primaryKeyName = $this->getKeyName($table);
         
         // rules -------------------------------------
         $str = '';
         foreach ($columns as $column) {
+            if($primaryKeyName === $column->COLUMN_NAME){
+                continue;
+            }
             $str .= "
             '{$column->COLUMN_NAME}' => ";
             $str .= "[";
@@ -194,7 +216,7 @@ class ModelMakeCommand extends GeneratorCommand
             $str .= "'{$this->getDataType($column->DATA_TYPE)}'";
             
             if ($column->CHARACTER_MAXIMUM_LENGTH) {
-                $str .= "', max:{$column->CHARACTER_MAXIMUM_LENGTH}'";
+                $str .= ", 'max:{$column->CHARACTER_MAXIMUM_LENGTH}'";
             }
             
             $str .= "],";
@@ -265,5 +287,22 @@ class ModelMakeCommand extends GeneratorCommand
             '\\', '', Str::snake(Str::plural($class))
         );
 
+    }
+    
+    public function getKeyName(string $table)
+    {
+        $prefix = DB::getConfig('prefix');
+        $db = config('database.connections.mysql.database');
+        $row = DB::select("SELECT column_name FROM INFORMATION_SCHEMA.`KEY_COLUMN_USAGE` WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}' AND constraint_name='PRIMARY'");
+        
+        return $row[0]->column_name ?? null;
+    }
+    
+    public function existsTable(string $table)
+    {
+        $prefix = DB::getConfig('prefix');
+        $db = config('database.connections.mysql.database');
+        $row = DB::select("SELECT table_name FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}'");
+        return $row[0]->table_name ?? null;
     }
 }

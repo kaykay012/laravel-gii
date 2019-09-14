@@ -81,9 +81,8 @@ class CurdMakeCommand extends GeneratorCommand
 
         if ($this->option('model')) {
             $replace = $this->buildModelReplacements($replace);
+            $replace = $this->buildCurdReplacements($replace);
         }
-
-        $replace = $this->buildCurdReplacements($replace);
 
         $replace["use {$controllerNamespace}\Controller;\n"] = '';
 
@@ -126,7 +125,7 @@ class CurdMakeCommand extends GeneratorCommand
 
         if (!class_exists($modelClass)) {
             if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
-                $this->call('make:model', ['name' => $modelClass]);
+                $this->call('make:modelk', ['name' => $modelClass]);
             }
         }
         return array_merge($replace, [
@@ -174,8 +173,10 @@ class CurdMakeCommand extends GeneratorCommand
     protected function buildCurdReplacements(array $replace)
     {
         $modelClass = $this->parseModel($this->option('model'));
+        
         $obj = new $modelClass();
         $table = $obj->getTable();
+        $primaryKeyName = $obj->getKeyName();
         $columns = CommonClass::getColumns($table);
         
         // Search Condition
@@ -190,6 +191,7 @@ class CurdMakeCommand extends GeneratorCommand
         return array_merge($replace, [
             'DummyTableName' => $table,
             'DummySearchCondition' => ltrim($searchCondition),
+            'DummyPrimaryKeyName' => $primaryKeyName,
         ]);
     }
 }

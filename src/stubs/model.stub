@@ -3,23 +3,26 @@
 namespace DummyNamespace;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rule;
 
 class DummyClass extends Model
 {
     protected $table = 'DummyTableName';
+    protected $guarded = [];
     
-    public static function rules($on = null)
+    public function rules($on = null)
     {
-        return [DummyRules
+        return [
+            'id' => ['sometimes', 'integer', Rule::exists('DummyTableName')],DummyRules
         ];
     }
 
-    public static function messages()
+    public function messages()
     {
         return [];
     }
     
-    public static function attributes()
+    public function attributes()
     {
         return [DummyAttributes
         ];

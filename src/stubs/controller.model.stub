@@ -18,7 +18,7 @@ class DummyClass extends Controller
     public function index(Request $request)
     {
 
-        $model = DummyModelClass::orderBy($request->input('sort', 'id'), $request->input('sortBy', 'DESC'));
+        $model = DummyModelClass::orderBy($request->input('sort', 'DummyPrimaryKeyName'), $request->input('sortBy', 'DESC'));
         DummySearchCondition
         if(isset($request->page) && $request->page <= 0){
             $rows = $model->limit(10)->get();
@@ -39,7 +39,7 @@ class DummyClass extends Controller
     {
         $validator = Validator::make($request->all(), 
             [
-                'id', ['required', 'integer', Rule::exists('DummyTableName')]
+                'id' => ['required', 'integer', Rule::exists('DummyTableName')],
             ]
         );
         if ($validator->fails()) {
@@ -60,12 +60,12 @@ class DummyClass extends Controller
      */
     public function create(Request $request, DummyModelClass $DummyModelVariable)
     {
-        $validator = Validator::make($request->all(), DummyModelClass::rules(), DummyModelClass::messages(), DummyModelClass::attributes());
+        $validator = Validator::make($request->all(), $DummyModelVariable->rules(), $DummyModelVariable->messages(), $DummyModelVariable->attributes());
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $model = new DummyModelClass($request->all());
-        if($model->save())
+        $DummyModelVariable->fill($request->all());
+        if($DummyModelVariable->save())
         {
             return ['code' => 200, 'msg' => 'Success'];
         }else{
@@ -82,7 +82,7 @@ class DummyClass extends Controller
      */
     public function update(Request $request, DummyModelClass $DummyModelVariable)
     {
-        $validator = Validator::make($request->all(), DummyModelClass::rules(), DummyModelClass::messages(), DummyModelClass::attributes());
+        $validator = Validator::make($request->all(), $DummyModelVariable->rules(), $DummyModelVariable->messages(), $DummyModelVariable->attributes());
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
@@ -105,13 +105,13 @@ class DummyClass extends Controller
     {
         $validator = Validator::make($request->all(), 
             [
-                'id' => ['required', 'array']
+                'id' => ['required', 'array'],
             ]
         );
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $model = DummyModelClass::whereIn('id', is_array($request->id) ? $request->id : [$request->id]);
+        $model = DummyModelClass::whereIn('DummyPrimaryKeyName', is_array($request->id) ? $request->id : [$request->id]);
         if($model->delete()){
             return ['code' => 200, 'msg' => 'Success'];
         }else{
