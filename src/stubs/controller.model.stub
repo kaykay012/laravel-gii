@@ -4,7 +4,8 @@ namespace DummyNamespace;
 
 use Illuminate\Http\Request;
 use DummyRootNamespaceHttp\Controllers\Controller;
-use Illuminate\Validation\Validator;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use DummyFullModelClass;
 
 class DummyClass extends Controller
@@ -14,9 +15,18 @@ class DummyClass extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+
+        $model = DummyModelClass::orderBy($request->input('sort', 'id'), $request->input('sortBy', 'DESC'));
+        DummySearchCondition
+        if(isset($request->page) && $request->page <= 0){
+            $rows = $model->limit(10)->get();
+        }else{
+            $rows = $model->paginate();
+        }
+        //$rows->makeHidden(['updated_at']);
+        return ['code' => 200, 'msg' => 'Success', 'data' => $rows];
     }
 
     /**
@@ -25,9 +35,22 @@ class DummyClass extends Controller
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), 
+            [
+                'id', ['required', 'integer', Rule::exists('DummyTableName')]
+            ]
+        );
+        if ($validator->fails()) {
+            return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
+        }
+        $model = DummyModelClass::find($request->id);
+        if($model){
+            return ['code' => 200, 'msg' => 'Success', 'data' => $model];
+        }else{
+            return ['code' => 50001, 'msg' => 'Server internal error'];
+        }
     }
     
     /**
@@ -47,8 +70,9 @@ class DummyClass extends Controller
         if($model->save())
         {
             return ['code' => 200, 'msg' => 'Success'];
+        }else{
+            return ['code' => 50001, 'msg' => 'Server internal error'];
         }
-        return ['code' => 50001, 'msg' => 'Server internal error'];
     }
 
     /**
@@ -58,9 +82,21 @@ class DummyClass extends Controller
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function update($id)
+    public function update(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), 
+        DummyUpdateRules
+        );
+        if ($validator->fails()) {
+            return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
+        }
+        $model = DummyModelClass::where('id', $request->id);
+        if($model->update($request->all()))
+        {
+            return ['code' => 200, 'msg' => 'Success'];
+        }else{
+            return ['code' => 50001, 'msg' => 'Server internal error'];
+        }
     }
 
     /**
@@ -69,8 +105,21 @@ class DummyClass extends Controller
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        //
+        $validator = Validator::make($request->all(), 
+            [
+                'id' => ['required', 'array']
+            ]
+        );
+        if ($validator->fails()) {
+            return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
+        }
+        $model = DummyModelClass::whereIn('id', is_array($request->id) ? $request->id : [$request->id]);
+        if($model->delete()){
+            return ['code' => 200, 'msg' => 'Success'];
+        }else{
+            return ['code' => 50001, 'msg' => 'Server internal error'];
+        }
     }
 }

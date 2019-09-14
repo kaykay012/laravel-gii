@@ -39,17 +39,15 @@ class CurdMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        $path = base_path() . '\vendor/laravel\framework\src\Illuminate\Routing\Console';
         if ($this->option('parent')) {
-            return $path . '/stubs/controller.nested.stub';
+            return __DIR__ . '/stubs/controller.nested.stub';
         } elseif ($this->option('model')) {
-            dd('a');
             return __DIR__ . '/stubs/controller.model.stub';
         } elseif ($this->option('resource')) {
-            return $path . '/stubs/controller.stub';
+            return __DIR__ . '/stubs/controller.stub';
         }
 
-        return $path . '/stubs/controller.plain.stub';
+        return __DIR__ . '/stubs/controller.plain.stub';
     }
 
     /**
@@ -181,9 +179,10 @@ class CurdMakeCommand extends GeneratorCommand
         $columns = $this->getColumns($table);
         
         // rule -------------------------------------
-        $str = "[";
+        $str = '[';
         foreach ($columns as $column) {
-            $str .= "\n\t\t'{$column->COLUMN_NAME}' => ";
+            $str .= "
+            '{$column->COLUMN_NAME}' => ";
             $str .= "[";
             if ($column->IS_NULLABLE === 'NO') {
                 $str .= "'required', ";
@@ -191,24 +190,42 @@ class CurdMakeCommand extends GeneratorCommand
             $str .= "'{$this->getDataType($column->DATA_TYPE)}'";
             $str .= "],";
         }
-        $str .= "\n\t],";
+        $str .= "
+        ],";
         // ------------------------------------------
         
         // custom rule ------------------------------
-        $str .= "\n\t[],";
+        $str .= "
+        [],
+        ";
         // ------------------------------------------
         
         // comment ----------------------------------
-        $str .= "\n\t[";
+        $str .= "[";
         foreach($columns as $column){
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
-            $str .= "\n\t\t'{$column->COLUMN_NAME}' => '{$COLUMN_COMMENT}',";
+            $str .= "
+            '{$column->COLUMN_NAME}' => '{$COLUMN_COMMENT}',";
         }
-        $str .= "\n\t]";
+        $str .= "
+        ]";
         // ------------------------------------------
         
+        $str_update = $str;
+        
+        // Search Condition
+        $searchCondition = '';
+        foreach ($columns as $key=>$column) {
+            $searchCondition .= '
+        if ($request->'.$column->COLUMN_NAME.') {
+            $model->where(\''.$column->COLUMN_NAME.'\', $request->'.$column->COLUMN_NAME.');
+        }';
+        }
         return array_merge($replace, [
+            'DummyTableName' => $table,
             'DummyRules' => $str,
+            'DummyUpdateRules' => $str_update,
+            'DummySearchCondition' => ltrim($searchCondition),
         ]);
     }
 
