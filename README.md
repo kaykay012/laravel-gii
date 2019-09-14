@@ -10,8 +10,9 @@ composer require --prefer-dist kaykay012/laravel-gii
 使用示例
 _______
 ```
-# 创建 CURD 逻辑
+#创建 CURD 逻辑
 php artisan make:curd CurdController --model=App\\Models\\User
-# 创建 Model, 包含验证规则
+
+#创建 Model, 包含验证规则
 php artisan make:modelk Models/User --table=users
 ```
