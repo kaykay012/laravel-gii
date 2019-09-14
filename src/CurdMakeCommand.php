@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace kaykay012\laravelgii;
 
 use Illuminate\Support\Str;
 use InvalidArgumentException;
