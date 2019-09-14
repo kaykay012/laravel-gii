@@ -6,5 +6,22 @@ use Illuminate\Database\Eloquent\Model;
 
 class DummyClass extends Model
 {
-    //
+    protected $table = 'DummyTableName';
+    
+    public static function rules($on = null)
+    {
+        return [DummyRules
+        ];
+    }
+
+    public static function messages()
+    {
+        return [];
+    }
+    
+    public static function attributes()
+    {
+        return [DummyAttributes
+        ];
+    }
 }

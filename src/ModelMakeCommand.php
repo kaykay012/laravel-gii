@@ -5,6 +5,7 @@ namespace kaykay012\laravelgii;
 use Illuminate\Support\Str;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
+use Illuminate\Support\Facades\DB;
 
 class ModelMakeCommand extends GeneratorCommand
 {
@@ -39,13 +40,13 @@ class ModelMakeCommand extends GeneratorCommand
      */
     protected function buildClass($name)
     {
-        dd($name);
-        $controllerNamespace = $this->getNamespace($name);
-
-        $replace = $this->buildRulesReplacements($replace);
-
-        $replace["use {$controllerNamespace}\Controller;\n"] = '';
-
+        $table = $this->getTable($name);
+        
+        $replace['DummyTableName'] = $table;
+        
+        $replace = $this->buildRulesReplacements($replace, $table);
+        $replace = $this->buildAttributesReplacements($replace, $table);
+        
         return str_replace(
                 array_keys($replace), array_values($replace), parent::buildClass($name)
         );
@@ -176,13 +177,12 @@ class ModelMakeCommand extends GeneratorCommand
         ];
     }
     
-    protected function buildRulesReplacements(array $replace)
+    protected function buildRulesReplacements(array $replace, $table)
     {
-        $table = $obj->getTable();
-        $columns = $this->getColumns($table);
+        $columns = CommonClass::getColumns($table);
         
-        // rule -------------------------------------
-        $str = '[';
+        // rules -------------------------------------
+        $str = '';
         foreach ($columns as $column) {
             $str .= "
             '{$column->COLUMN_NAME}' => ";
@@ -190,59 +190,38 @@ class ModelMakeCommand extends GeneratorCommand
             if ($column->IS_NULLABLE === 'NO') {
                 $str .= "'required', ";
             }
+            
             $str .= "'{$this->getDataType($column->DATA_TYPE)}'";
+            
+            if ($column->CHARACTER_MAXIMUM_LENGTH) {
+                $str .= "', max:{$column->CHARACTER_MAXIMUM_LENGTH}'";
+            }
+            
             $str .= "],";
         }
-        $str .= "
-        ],";
-        // ------------------------------------------
+        // ------------------------------
         
-        // custom rule ------------------------------
-        $str .= "
-        [],
-        ";
-        // ------------------------------------------
+        return array_merge($replace, [
+            'DummyRules' => $str,
+        ]);
+    }
+    
+    protected function buildAttributesReplacements(array $replace, $table)
+    {
+        $columns = CommonClass::getColumns($table);
         
-        // comment ----------------------------------
-        $str .= "[";
+        // attributes ----------------------------------
+        $str = "";
         foreach($columns as $column){
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
             $str .= "
             '{$column->COLUMN_NAME}' => '{$COLUMN_COMMENT}',";
         }
-        $str .= "
-        ]";
         // ------------------------------------------
         
-        $str_update = $str;
-        
-        // Search Condition
-        $searchCondition = '';
-        foreach ($columns as $key=>$column) {
-            $searchCondition .= '
-        if ($request->'.$column->COLUMN_NAME.') {
-            $model->where(\''.$column->COLUMN_NAME.'\', $request->'.$column->COLUMN_NAME.');
-        }';
-        }
         return array_merge($replace, [
-            'DummyTableName' => $table,
-            'DummyRules' => $str,
-            'DummyUpdateRules' => $str_update,
-            'DummySearchCondition' => ltrim($searchCondition),
+            'DummyAttributes' => $str,
         ]);
-    }
-
-    protected function getColumns(string $table)
-    {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
-        $columns = DB::select("SELECT "
-                        . "COLUMN_NAME,IS_NULLABLE,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,COLUMN_COMMENT "
-                        . "FROM INFORMATION_SCHEMA.COLUMNS "
-                        . "WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'"
-                        . ";"
-        );
-        return $columns;
     }
 
     protected function getDataType(string $type)
@@ -272,5 +251,19 @@ class ModelMakeCommand extends GeneratorCommand
         } else {
             return 'string';
         }
+    }
+    
+    /**
+     * Get the table associated with the model.
+     *
+     * @return string
+     */
+    protected function getTable($name)
+    {
+        $class = str_replace($this->getNamespace($name).'\\', '', $name);
+        return str_replace(
+            '\\', '', Str::snake(Str::plural($class))
+        );
+
     }
 }

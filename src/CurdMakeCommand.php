@@ -176,42 +176,7 @@ class CurdMakeCommand extends GeneratorCommand
         $modelClass = $this->parseModel($this->option('model'));
         $obj = new $modelClass();
         $table = $obj->getTable();
-        $columns = $this->getColumns($table);
-        
-        // rule -------------------------------------
-        $str = '[';
-        foreach ($columns as $column) {
-            $str .= "
-            '{$column->COLUMN_NAME}' => ";
-            $str .= "[";
-            if ($column->IS_NULLABLE === 'NO') {
-                $str .= "'required', ";
-            }
-            $str .= "'{$this->getDataType($column->DATA_TYPE)}'";
-            $str .= "],";
-        }
-        $str .= "
-        ],";
-        // ------------------------------------------
-        
-        // custom rule ------------------------------
-        $str .= "
-        [],
-        ";
-        // ------------------------------------------
-        
-        // comment ----------------------------------
-        $str .= "[";
-        foreach($columns as $column){
-            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
-            $str .= "
-            '{$column->COLUMN_NAME}' => '{$COLUMN_COMMENT}',";
-        }
-        $str .= "
-        ]";
-        // ------------------------------------------
-        
-        $str_update = $str;
+        $columns = CommonClass::getColumns($table);
         
         // Search Condition
         $searchCondition = '';
@@ -221,54 +186,10 @@ class CurdMakeCommand extends GeneratorCommand
             $model->where(\''.$column->COLUMN_NAME.'\', $request->'.$column->COLUMN_NAME.');
         }';
         }
+        
         return array_merge($replace, [
             'DummyTableName' => $table,
-            'DummyRules' => $str,
-            'DummyUpdateRules' => $str_update,
             'DummySearchCondition' => ltrim($searchCondition),
         ]);
     }
-
-    protected function getColumns(string $table)
-    {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
-        $columns = DB::select("SELECT "
-                        . "COLUMN_NAME,IS_NULLABLE,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,COLUMN_COMMENT "
-                        . "FROM INFORMATION_SCHEMA.COLUMNS "
-                        . "WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'"
-                        . ";"
-        );
-        return $columns;
-    }
-
-    protected function getDataType(string $type)
-    {
-        $data_type = strtoupper($type);
-        $data = [
-            'integer' => ['TINYINT', 'SMALLINT', 'MEDIUMINT', 'INTEGER', 'INT', 'BIGINT'],
-            'numberic' => ['FLOAT', 'DOUBLE', 'DECIMAL'],
-            'date' => ['DATE'],
-            'time' => ['TIME'],
-            'year' => ['YEAR'],
-            'datetime' => ['DATETIME', 'TIMESTAMP'],
-            'string' => ['CHAR', 'VARCHAR', 'TINYTEXT', 'TEXT', 'LONGTEXT'],
-        ];
-        if (in_array($data_type, $data['integer'])) {
-            return 'integer';
-        } elseif (in_array($data_type, $data['numberic'])) {
-            return 'numberic';
-        } elseif (in_array($data_type, $data['date'])) {
-            return 'date';
-        } elseif (in_array($data_type, $data['time'])) {
-            return 'date_format:H:i:s';
-        } elseif (in_array($data_type, $data['year'])) {
-            return 'date_format:Y';
-        } elseif (in_array($data_type, $data['datetime'])) {
-            return 'datetime';
-        } else {
-            return 'string';
-        }
-    }
-
 }
