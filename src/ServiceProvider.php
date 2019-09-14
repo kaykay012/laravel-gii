@@ -14,6 +14,7 @@ class ServiceProvider extends LaravelServiceProvider
     {
         $this->commands([
             CurdMakeCommand::class,
+            ModelMakeCommand::class,
         ]);
     }
 
@@ -32,6 +33,7 @@ class ServiceProvider extends LaravelServiceProvider
     {
         return [
             CurdMakeCommand::class,
+            ModelMakeCommand::class,
         ];
     }
 
