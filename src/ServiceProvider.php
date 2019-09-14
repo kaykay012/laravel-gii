@@ -2,7 +2,9 @@
 
 namespace kaykay012\laravelgii;
 
-class ServiceProvider extends Illuminate\Support\ServiceProvider
+use Illuminate\Support\ServiceProvider as LaravelServiceProvider;
+
+class ServiceProvider extends LaravelServiceProvider
 {
 
     /**
