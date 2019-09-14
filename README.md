@@ -8,7 +8,7 @@
 composer require --prefer-dist kaykay012/laravel-gii 
 ```
 使用示例
-_______
+-------
 
 ```
 #创建 Model, 包含验证规则
