@@ -58,11 +58,9 @@ class DummyClass extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request)
+    public function create(Request $request, DummyModelClass $DummyModelVariable)
     {
-        $validator = Validator::make($request->all(), 
-        DummyRules
-        );
+        $validator = Validator::make($request->all(), DummyModelClass::rules(), DummyModelClass::messages(), DummyModelClass::attributes());
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
@@ -82,11 +80,9 @@ class DummyClass extends Controller
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update(Request $request, DummyModelClass $DummyModelVariable)
     {
-        $validator = Validator::make($request->all(), 
-        DummyUpdateRules
-        );
+        $validator = Validator::make($request->all(), DummyModelClass::rules(), DummyModelClass::messages(), DummyModelClass::attributes());
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
