@@ -16,7 +16,7 @@
     },
     "autoload": {
         "psr-4": {
-            "kaykay012\\laravelgii\\": ""
+            "kaykay012\\laravelgii\\": "src/"
         }
     },
     "extra": {
