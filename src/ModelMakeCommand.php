@@ -50,13 +50,14 @@ class ModelMakeCommand extends GeneratorCommand
             $exists = $this->existsTable($table);
             if (!$exists) {
                 $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or continue generate it.", $table);                
+                if($tableAsk === $table){
+                    break;
+                }else{
+                    $table = $tableAsk;
+                }
             }
-            if($tableAsk === $table){
-                $exists = true;
-            }else{
-                $table = $tableAsk;
-            }
-        }while($exists === null && $table !== false);
+            
+        }while(isset($tableAsk) && $tableAsk !== false);
         
         $replace['DummyTableName'] = $table;
         
