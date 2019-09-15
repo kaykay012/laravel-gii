@@ -55,8 +55,9 @@ class ModelMakeCommand extends GeneratorCommand
                 }else{
                     $table = $tableAsk;
                 }
+            }else{
+                break;
             }
-            
         }while(isset($tableAsk) && $tableAsk !== false);
         
         $replace['DummyTableName'] = $table;

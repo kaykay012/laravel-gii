@@ -29,4 +29,9 @@ class CommonClass
         );
         return $columns;
     }
+    
+    public static function getModelPath($modelClass)
+    {
+        return str_replace('App\\', '', $modelClass);
+    }
 }

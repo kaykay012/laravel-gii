@@ -126,6 +126,10 @@ class CurdMakeCommand extends GeneratorCommand
         if (!class_exists($modelClass)) {
             if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
                 $this->call('make:modelk', ['name' => $modelClass]);
+                $path = CommonClass::getModelPath($modelClass);
+                require_once base_path(). '/app/'.$path.'.php';
+            }else{
+                exit(0);
             }
         }
         return array_merge($replace, [
@@ -193,5 +197,5 @@ class CurdMakeCommand extends GeneratorCommand
             'DummySearchCondition' => ltrim($searchCondition),
             'DummyPrimaryKeyName' => $primaryKeyName,
         ]);
-    }
+    }        
 }
