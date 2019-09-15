@@ -36,11 +36,9 @@ class DummyClass extends Controller
      */
     public function show(Request $request)
     {
-        $validator = Validator::make($request->all(), 
-            [
-                'id' => ['required', 'integer', Rule::exists('DummyTableName')],
-            ]
-        );
+        $validator = Validator::make($request->all(), [
+            'id' => ['required', 'integer', Rule::exists('DummyTableName')],
+        ]);
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
@@ -59,7 +57,7 @@ class DummyClass extends Controller
      */
     public function create(Request $request, DummyModelClass $DummyModelVariable)
     {
-        $validator = Validator::make($request->all(), $DummyModelVariable->rules(), $DummyModelVariable->messages(), $DummyModelVariable->attributes());
+        $validator = Validator::make($request->all(), $DummyModelVariable->rules(), $DummyModelVariable->messages(), $DummyModelVariable->customAttributes());
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
@@ -81,7 +79,14 @@ class DummyClass extends Controller
      */
     public function update(Request $request, DummyModelClass $DummyModelVariable)
     {
-        $validator = Validator::make($request->all(), $DummyModelVariable->rules(), $DummyModelVariable->messages(), $DummyModelVariable->attributes());
+        $validator = Validator::make(
+            $request->all(), 
+            array_merge([
+                'id' => ['required', 'integer', Rule::exists('DummyTableName')],
+            ], $DummyModelVariable->rules()), 
+            $DummyModelVariable->messages(), 
+            $DummyModelVariable->customAttributes()
+        );
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
@@ -102,11 +107,9 @@ class DummyClass extends Controller
      */
     public function destroy(Request $request)
     {
-        $validator = Validator::make($request->all(), 
-            [
-                'id' => ['required', 'array'],
-            ]
-        );
+        $validator = Validator::make($request->all(), [
+            'id' => ['required', 'array'],
+        ]);
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
