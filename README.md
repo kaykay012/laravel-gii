@@ -12,7 +12,7 @@ composer require --prefer-dist kaykay012/laravel-gii
 
 创建 Model, 包含验证规则
 ```
-php artisan make:modelk Models/User --table=users
+php artisan make:model-rule Models/User --table=users
 ```
 创建 CURD 逻辑
 ```
