@@ -43,6 +43,20 @@ class ViewVueMakeCommand extends GeneratorCommand
         
         $form = $path  . '/form.vue';
         $list = $path  . '/list.vue';
+        
+        // First we will check to see if the class already exists. If it does, we don't want
+        // to create the class and overwrite the user's code. So, we will bail out so the
+        // code is untouched. Otherwise, we will continue generating this class' files.
+        if ((! $this->hasOption('force') || ! $this->option('force'))) {
+            if($this->files->exists($form)){
+                $this->error($this->type."`{$form}` already exists!");
+            }
+            if($this->files->exists($list)){
+                $this->error($this->type."`{$list}` already exists!");
+            }
+
+            return false;
+        }
 
         $this->makeDirectory($form);
         $this->makeDirectory($list);
@@ -50,7 +64,8 @@ class ViewVueMakeCommand extends GeneratorCommand
         $this->files->put($form, $this->buildClass('form'));
         $this->files->put($list, $this->buildClass('list'));
 
-        $this->info($this->type.' created successfully.');
+        $this->info($this->type."`{$form}` created successfully.");
+        $this->info($this->type."`{$list}` created successfully.");
     }
     
     /**

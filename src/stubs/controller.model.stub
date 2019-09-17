@@ -25,7 +25,7 @@ class DummyClass extends Controller
             $rows = $model->paginate();
         }
         //$rows->makeHidden(['updated_at']);
-        return ['code' => 200, 'msg' => 'Success', 'data' => $rows];
+        return ['code' => 200, 'msg' => __('common.Success'), 'data' => $rows];
     }
 
     /**
@@ -44,9 +44,9 @@ class DummyClass extends Controller
         }
         $model = DummyModelClass::find($request->id);
         if($model){
-            return ['code' => 200, 'msg' => 'Success', 'data' => $model];
+            return ['code' => 200, 'msg' => __('common.Success'), 'data' => $model];
         }else{
-            return ['code' => 50001, 'msg' => 'Server internal error'];
+            return ['code' => 50001, 'msg' => __('common.Server internal error')];
         }
     }
     
@@ -61,12 +61,12 @@ class DummyClass extends Controller
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $DummyModelVariable->fill($request->all());
+        $DummyModelVariable->fill($user->onlyCustomAttributes($request->all()));
         if($DummyModelVariable->save())
         {
-            return ['code' => 200, 'msg' => 'Success'];
+            return ['code' => 200, 'msg' => __('common.Success'), 'data' => $DummyModelVariable];
         }else{
-            return ['code' => 50001, 'msg' => 'Server internal error'];
+            return ['code' => 50001, 'msg' => __('common.Server internal error')];
         }
     }
 
@@ -90,12 +90,13 @@ class DummyClass extends Controller
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $model = DummyModelClass::where('id', $request->id);
-        if($model->update($request->all()))
+        $model = $DummyModelVariable::where('id', $request->id);
+        $data = $DummyModelVariable->onlyCustomAttributes($request->all());
+        if($model->update($data))
         {
-            return ['code' => 200, 'msg' => 'Success'];
+            return ['code' => 200, 'msg' => __('common.Success'), 'data' => $model->first()];
         }else{
-            return ['code' => 50001, 'msg' => 'Server internal error'];
+            return ['code' => 50001, 'msg' => __('common.Server internal error')];
         }
     }
 
@@ -115,9 +116,9 @@ class DummyClass extends Controller
         }
         $model = DummyModelClass::whereIn('DummyPrimaryKeyName', is_array($request->id) ? $request->id : [$request->id]);
         if($model->delete()){
-            return ['code' => 200, 'msg' => 'Success'];
+            return ['code' => 200, 'msg' => __('common.Success')];
         }else{
-            return ['code' => 50001, 'msg' => 'Server internal error'];
+            return ['code' => 50001, 'msg' => __('common.Server internal error')];
         }
     }
 }

@@ -38,4 +38,16 @@ class DummyClass extends Model
         return [DummyAttributes
         ];
     }
+    
+    
+    /**
+     * Filter Request Attributes and Retain only customAttributes
+     * @param array $data Request data
+     * @return type
+     */
+    public function onlyCustomAttributes(array $data)
+    {
+        $attributes = $this->customAttributes();
+        return collect($data)->except('id')->only(array_keys($attributes))->toArray();
+    }
 }
