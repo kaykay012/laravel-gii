@@ -212,10 +212,6 @@ class CurdMakeCommand extends GeneratorCommand
                 $uniques = CommonClass::getIndexColumns($table, $constraint_name);
                 $fields = collect($uniques)->pluck('COLUMN_NAME');
                 
-//                dd($arr);
-                
-                
-                
                 foreach ($fields as $field){
                     
                     $uniqueRule .= "
@@ -226,7 +222,7 @@ class CurdMakeCommand extends GeneratorCommand
                     });
                     $where_str = '';
                     foreach($fields_except as $fe){
-                        $where_str .= '->where("'.$fe.'", $request->'.$fe.')';
+                        $where_str .= '->where("'.$fe.'", $request->'.$fe.'?:" ")';
                     }
                     
                     $uniqueRule .= $where_str.'],';
@@ -241,7 +237,7 @@ class CurdMakeCommand extends GeneratorCommand
                     });
                     $where_str = '';
                     foreach($fields_except as $fe){
-                        $where_str .= '->where("'.$fe.'", $request->'.$fe.')';
+                        $where_str .= '->where("'.$fe.'", $request->'.$fe.'?:" ")';
                     }
                     
                     $uniqueRuleUpdate .= $where_str . "->ignore(".'$request->id'.")],";
