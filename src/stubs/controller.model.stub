@@ -57,7 +57,13 @@ class DummyClass extends Controller
      */
     public function create(Request $request, DummyModelClass $DummyModelVariable)
     {
-        $validator = Validator::make($request->all(), $DummyModelVariable->rules(), $DummyModelVariable->messages(), $DummyModelVariable->customAttributes());
+        $validator = Validator::make(
+            $request->all(), 
+            array_merge_recursive($DummyModelVariable->rules(), [DummyUniqueRule
+            ]), 
+            $DummyModelVariable->messages(), 
+            $DummyModelVariable->customAttributes()
+        );
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
@@ -81,9 +87,9 @@ class DummyClass extends Controller
     {
         $validator = Validator::make(
             $request->all(), 
-            array_merge([
-                'id' => ['required', 'integer', Rule::exists('DummyTableName')],
-            ], $DummyModelVariable->rules()), 
+            array_merge_recursive($DummyModelVariable->rules(), [
+                'id' => ['required', 'integer', Rule::exists('DummyTableName')],DummyUniqueUpdateRule
+            ]), 
             $DummyModelVariable->messages(), 
             $DummyModelVariable->customAttributes()
         );

@@ -32,6 +32,13 @@ class CurdMakeCommand extends GeneratorCommand
      */
     protected $type = 'Controller';
 
+    public function handle()
+    {
+        if (parent::handle() === false && ! $this->option('force')) {
+            return;
+        }
+    }
+    
     /**
      * Get the stub file for the generator.
      *
@@ -48,7 +55,7 @@ class CurdMakeCommand extends GeneratorCommand
         }
 
         return __DIR__ . '/stubs/controller.plain.stub';
-    }
+    }   
 
     /**
      * Get the default namespace for the class.
@@ -171,6 +178,7 @@ class CurdMakeCommand extends GeneratorCommand
             ['model', 'm', InputOption::VALUE_OPTIONAL, 'Generate a resource controller for the given model.'],
             ['resource', 'r', InputOption::VALUE_NONE, 'Generate a resource controller class.'],
             ['parent', 'p', InputOption::VALUE_OPTIONAL, 'Generate a nested resource controller class.'],
+            ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists.'],
         ];
     }
 
@@ -184,18 +192,70 @@ class CurdMakeCommand extends GeneratorCommand
         $columns = CommonClass::getColumns($table);
         
         // Search Condition
-        $searchCondition = '';
+        $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
         foreach ($columns as $key=>$column) {
             $searchCondition .= '
         if ($request->'.$column->COLUMN_NAME.') {
             $model->where(\''.$column->COLUMN_NAME.'\', $request->'.$column->COLUMN_NAME.');
         }';
+            //单字段唯一索引
+            if($column->COLUMN_KEY === 'UNI'){
+                $uniqueRule .= "
+                '{$column->COLUMN_NAME}' => ['unique:{$table}'],";
+            
+                $uniqueRuleUpdate .= "
+                '".$column->COLUMN_NAME."' => [Rule::unique('".$table."')->ignore(".'$request->id'.")],";
+            }
+            //多字段唯一索引
+            if($column->COLUMN_KEY === 'MUL'){
+                $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME);
+                $uniques = CommonClass::getIndexColumns($table, $constraint_name);
+                $fields = collect($uniques)->pluck('COLUMN_NAME');
+                
+//                dd($arr);
+                
+                
+                
+                foreach ($fields as $field){
+                    
+                    $uniqueRule .= "
+                '".$field."' => [Rule::unique('".$table."')";
+                    
+                    $fields_except = $fields->reject(function ($value, $key) use($field) {
+                        return $value === $field;
+                    });
+                    $where_str = '';
+                    foreach($fields_except as $fe){
+                        $where_str .= '->where("'.$fe.'", $request->'.$fe.')';
+                    }
+                    
+                    $uniqueRule .= $where_str.'],';
+                    
+                    //===========================
+                    
+                    $uniqueRuleUpdate .= "
+                '".$field."' => [Rule::unique('".$table."')";
+                    
+                    $fields_except = $fields->reject(function ($value, $key) use($field) {
+                        return $value === $field;
+                    });
+                    $where_str = '';
+                    foreach($fields_except as $fe){
+                        $where_str .= '->where("'.$fe.'", $request->'.$fe.')';
+                    }
+                    
+                    $uniqueRuleUpdate .= $where_str . "->ignore(".'$request->id'.")],";
+                }
+            }
+            
         }
         
         return array_merge($replace, [
             'DummyTableName' => $table,
             'DummySearchCondition' => ltrim($searchCondition),
             'DummyPrimaryKeyName' => $primaryKeyName,
+            'DummyUniqueRule' => $uniqueRule,
+            'DummyUniqueUpdateRule' => $uniqueRuleUpdate,
         ]);
     }        
 }
