@@ -22,7 +22,7 @@ class CommonClass
         $prefix = DB::getConfig('prefix');
         $db = config('database.connections.mysql.database');
         $columns = DB::select("SELECT "
-                        . "COLUMN_NAME,IS_NULLABLE,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,COLUMN_COMMENT "
+                        . "COLUMN_NAME,IS_NULLABLE,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,COLUMN_COMMENT,COLUMN_DEFAULT "
                         . "FROM INFORMATION_SCHEMA.COLUMNS "
                         . "WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'"
                         . ";"

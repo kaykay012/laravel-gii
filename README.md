@@ -14,6 +14,7 @@ composer require --prefer-dist kaykay012/laravel-gii
 ```
 php artisan make:model-rule Models/User --table=users
 ```
+
 创建 CURD 逻辑
 ```
 php artisan make:curd CurdController --model=App\\Models\\User

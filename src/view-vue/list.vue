@@ -6,8 +6,7 @@
         :model="searchData"
         ref="searchData"
         class="demo-form-inline search-form"
-      >
-        DummyAttributes
+      >DummySearchInput
         <el-form-item>
           <el-button type="primary" size="mini" icon="search" @click="getDummyPathNameTitleCaseListData()">查询</el-button>
         </el-form-item>
@@ -18,8 +17,7 @@
       </el-form>
     </div>
     <div class="table_container">
-      <el-table :data="listDataDummyPathNameTitleCase" v-loading="loading" style="width: 100%" align="center">
-        DummyList
+      <el-table :data="listDataDummyPathNameTitleCase" v-loading="loading" style="width: 100%" align="center">DummyList
         <el-table-column fixed="right" label="操作" align="center" width="240">
           <template slot-scope="scope">
             <el-button
@@ -39,11 +37,11 @@
         @changeCurrentPage="getCurrentPage"
       ></pagination>
       <inputDummyPathNameTitleCase
-        v-if="showDialogDummyPathNameTitleCase.show"
-        :isShow="showDialogDummyPathNameTitleCase.show"
-        :dialogTitle="showDialogDummyPathNameTitleCase.title"
-        :dialogRow="showDialogDummyPathNameTitleCase.dialogRow"
-        :dialogType="showDialogDummyPathNameTitleCase.type"
+        v-if="showDialog.show"
+        :isShow="showDialog.show"
+        :dialogTitle="showDialog.title"
+        :dialogRow="showDialog.dialogRow"
+        :dialogType="showDialog.type"
         @closeDialog="hideAddAdminDialog"
         @getDummyPathNameTitleCaseListData="getDummyPathNameTitleCaseListData"
       ></inputDummyPathNameTitleCase>
@@ -66,13 +64,10 @@ export default {
       perPage: undefined, // 每页多少条
       currentPage: undefined, // 当前页
       last_page: 1, // 总页数
-      searchData: {
-        item_name: '',
-        status: '',
-        page: 1
+      searchData: {DummySearchParams
       },
       listDataDummyPathNameTitleCase: [],
-      showDialogDummyPathNameTitleCase: {
+      showDialog: {
         show: false,
         title: '添加',
         dialogRow: {},
@@ -103,18 +98,18 @@ export default {
     },
     showDialogDummyPathNameTitleCase (action, data) {
       if (action === 'add') {
-        this.showDialogDummyPathNameTitleCase.show = true
-        this.showDialogDummyPathNameTitleCase.dialogRow = {}
-        this.showDialogDummyPathNameTitleCase.title = '添加'
+        this.showDialog.show = true
+        this.showDialog.dialogRow = {}
+        this.showDialog.title = '添加'
       } else if (action === 'edit') {
-        this.showDialogDummyPathNameTitleCase.show = true
-        this.showDialogDummyPathNameTitleCase.dialogRow = data
-        this.showDialogDummyPathNameTitleCase.title = '编辑'
+        this.showDialog.show = true
+        this.showDialog.dialogRow = data
+        this.showDialog.title = '编辑'
       }
-      this.showDialogDummyPathNameTitleCase.type = action
+      this.showDialog.type = action
     },
     hideAddAdminDialog (val) {
-      this.showDialogDummyPathNameTitleCase.show = val
+      this.showDialog.show = val
     }
   },
   created () {

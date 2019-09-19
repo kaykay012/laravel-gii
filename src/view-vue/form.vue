@@ -13,9 +13,7 @@
         :model="inputForm"
         :label-width="dialog.formLabelWidth"
         style="margin:10px;width:auto"
-      >
-        DummyRules
-        
+      >DummyRules
         <el-form-item class="text_right">
           <el-button @click="dialogStatus = false">取 消</el-button>
           <el-button type="primary" @click="onSubmit('inputForm')">提 交</el-button>
@@ -31,12 +29,7 @@ export default {
     return {
       dialogStatus: this.isShow,
       actionType: this.dialogType,
-      inputForm: {
-        id: 0,
-        item_name: '',
-        category: '',
-        num: '',
-        status: 1
+      inputForm: {DummySearchParams
       },
       dialog: {
         width: '400px',
@@ -52,23 +45,23 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.actionType === 'add') {
-            adminsRequest.addCoinRule(this.inputForm)
+            adminsRequest.addDummyPathNameTitleCaseList(this.inputForm)
               .then(res => {
                 if (res.data.code === 200) {
                   this.closeDialog()
                   this.$message.success(res.data.msg)
-                  this.$emit('getListData')
+                  this.$emit('getDummyPathNameTitleCaseListData')
                 } else {
                   this.$message.error(res.data.msg)
                 }
               })
           } else {
-            adminsRequest.editCoinRule(this.inputForm)
+            adminsRequest.editDummyPathNameTitleCaseList(this.inputForm)
               .then(res => {
                 if (res.data.code === 200) {
                   this.closeDialog()
                   this.$message.success(res.data.msg)
-                  this.$emit('getListData')
+                  this.$emit('getDummyPathNameTitleCaseListData')
                 } else {
                   this.$message.error(res.data.msg)
                 }

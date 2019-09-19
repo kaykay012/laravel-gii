@@ -50,12 +50,15 @@ class ViewVueMakeCommand extends GeneratorCommand
         if ((! $this->hasOption('force') || ! $this->option('force'))) {
             if($this->files->exists($form)){
                 $this->error($this->type."`{$form}` already exists!");
+                $error =1;
             }
             if($this->files->exists($list)){
                 $this->error($this->type."`{$list}` already exists!");
+                $error =1;                
             }
-
-            return false;
+            if(isset($error)){
+                return false;
+            }
         }
 
         $this->makeDirectory($form);
@@ -78,11 +81,16 @@ class ViewVueMakeCommand extends GeneratorCommand
      */
     protected function buildClass($name)
     {
+        // coin/ruleAward
         $input_path = $this->getNameInput();
-        $underline_name = str_replace('/', ' ', $input_path);
-        $pathName = title_case($underline_name);    
+        $arr = explode('/', $input_path);
+        foreach($arr as $k=>$val){
+            $arr[$k] = snake_case($val);
+        }
+        $underline_name = join('_', $arr);
+        $pathName = studly_case($underline_name);
         $replace['DummyInputPath'] = $input_path;
-        $replace['DummyPathNameTitleCase'] = str_replace(' ','',$pathName);
+        $replace['DummyPathNameTitleCase'] = $pathName;
         
         if ($this->option('table')) {
             $table = $this->option('table');
@@ -157,36 +165,47 @@ class ViewVueMakeCommand extends GeneratorCommand
         $primaryKeyName = $this->getKeyName($table);
         
         // attributes ----------------------------------
-        $str_list = $str = "";
+        $str_search = $str_list = $str = "";
         $n = 1;
         foreach($columns as $column){
             if($primaryKeyName === $column->COLUMN_NAME){
                 continue;
             }
+            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
             if($n > 2){
                 $str .='
         <!-- ';
+            }else{
+                $str .="
+        ";
             }
-            
-            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
-            $str .= "
-        <el-form-item label=\"{$COLUMN_COMMENT}\">
+            $str .= "<el-form-item label=\"{$COLUMN_COMMENT}\">
           <el-input v-model=\"searchData.{$column->COLUMN_NAME}\" placeholder></el-input>
         </el-form-item>";
-            if($n > 3){
+            if($n > 2){
                 $str .=' -->';
             }
             
             $str_list .= "
         <el-table-column label=\"{$COLUMN_COMMENT}\" prop=\"{$column->COLUMN_NAME}\" align=\"center\"></el-table-column>";
             
+            if($n > 1){
+                $str_search .=  ",
+        ";
+            }else{
+                $str_search .=  "
+        ";
+            }
+            $str_search .= "{$column->COLUMN_NAME}: '{$column->COLUMN_DEFAULT}'";
+            
             ++$n;
         }
         // ------------------------------------------
         
         return array_merge($replace, [
-            'DummyAttributes' => $str,
+            'DummySearchInput' => $str,
             'DummyList' => $str_list,
+            'DummySearchParams' => $str_search,
         ]);
     }
 
