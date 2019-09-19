@@ -21,17 +21,28 @@ class CommonClass
     {
         $prefix = DB::getConfig('prefix');
         $db = config('database.connections.mysql.database');
-        $columns = DB::select("SELECT "
-                        . "COLUMN_NAME,IS_NULLABLE,DATA_TYPE,CHARACTER_MAXIMUM_LENGTH,COLUMN_COMMENT,COLUMN_DEFAULT "
-                        . "FROM INFORMATION_SCHEMA.COLUMNS "
-                        . "WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'"
-                        . ";"
-        );
+        $columns = DB::select("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'");
         return $columns;
     }
     
     public static function getModelPath($modelClass)
     {
         return str_replace('App\\', '', $modelClass);
+    }
+    
+    public static function getColumnsIndex(string $table, string $column_name)
+    {
+        $prefix = DB::getConfig('prefix');
+        $db = config('database.connections.mysql.database');
+        $columns = DB::select("SELECT * FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = '{$db}' AND `TABLE_NAME` = '{$prefix}{$table}' AND `COLUMN_NAME` = '$column_name';");
+        return $columns[0]->CONSTRAINT_NAME ?? '';
+    }
+    
+    public static function getIndexColumns(string $table, string $constraint_name)
+    {
+        $prefix = DB::getConfig('prefix');
+        $db = config('database.connections.mysql.database');
+        $columns = DB::select("SELECT * FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = '{$db}' AND `TABLE_NAME` = '{$prefix}{$table}' AND `CONSTRAINT_NAME` = '$constraint_name';");
+        return $columns;
     }
 }
