@@ -45,4 +45,27 @@ class CommonClass
         $columns = DB::select("SELECT * FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = '{$db}' AND `TABLE_NAME` = '{$prefix}{$table}' AND `CONSTRAINT_NAME` = '$constraint_name';");
         return $columns;
     }
+    
+    public static function getRoutePathName(string $name)
+    {
+        $name = str_replace('App\\Http\\Controllers\\', '', $name);
+        $name = str_replace('Controller', '', $name);
+        $arr = explode('\\', $name);
+        foreach($arr as $k=>$r){
+            $arr[$k] = kebab_case($r);
+        }
+        $path_name = join('/', $arr);
+        return $path_name;
+    }
+    
+    public static function getVueStudlyCase(string $name)
+    {
+        $arr = explode('/', $name);
+        foreach($arr as $k=>$val){
+            $arr[$k] = snake_case($val);
+        }
+        $underline_name = join('_', $arr);
+        $pathName = studly_case($underline_name);
+        return $pathName;
+    }
 }

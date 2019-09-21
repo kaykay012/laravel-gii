@@ -6,7 +6,6 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
-use Illuminate\Support\Facades\DB;
 
 class CurdMakeCommand extends GeneratorCommand
 {
@@ -37,6 +36,15 @@ class CurdMakeCommand extends GeneratorCommand
         if (parent::handle() === false && ! $this->option('force')) {
             return;
         }
+        $input_name = $this->getNameInput();
+        $name = $this->qualifyClass($input_name);
+        $url_path = CommonClass::getRoutePathName($name);
+        $controller_name = str_replace('/', '\\', $input_name);
+        $this->info('');
+        $this->info("Route::get('{$url_path}/index', '{$controller_name}@index');");
+        $this->info("Route::post('{$url_path}/create', '{$controller_name}@create');");
+        $this->info("Route::post('{$url_path}/update', '{$controller_name}@update');");
+        $this->info("Route::post('{$url_path}/destroy', '{$controller_name}@destroy');");
     }
     
     /**
@@ -253,5 +261,5 @@ class CurdMakeCommand extends GeneratorCommand
             'DummyUniqueRule' => $uniqueRule,
             'DummyUniqueUpdateRule' => $uniqueRuleUpdate,
         ]);
-    }        
+    }
 }

@@ -67,8 +67,31 @@ class ViewVueMakeCommand extends GeneratorCommand
         $this->files->put($form, $this->buildClass('form'));
         $this->files->put($list, $this->buildClass('list'));
 
+        $api_url_path = CommonClass::getRoutePathName($name);
+        $functionName = CommonClass::getVueStudlyCase($name);
+        $functionNameLcfirst = lcfirst($functionName);
+
         $this->info($this->type."`{$form}` created successfully.");
         $this->info($this->type."`{$list}` created successfully.");
+        $this->info('');
+        
+        $this->info("
+function {$functionNameLcfirst}List (obj) {
+    return request({
+      url: '{$api_url_path}/index',
+      method: 'GET',
+      params: obj
+    })
+}");
+        $this->info("
+function edit{$functionName} (obj) {
+    return request({
+      url: '{$api_url_path}/update',
+      method: 'POST',
+      params: obj
+    })
+}");
+        $this->info('');
     }
     
     /**
@@ -83,12 +106,7 @@ class ViewVueMakeCommand extends GeneratorCommand
     {
         // coin/ruleAward
         $input_path = $this->getNameInput();
-        $arr = explode('/', $input_path);
-        foreach($arr as $k=>$val){
-            $arr[$k] = snake_case($val);
-        }
-        $underline_name = join('_', $arr);
-        $pathName = studly_case($underline_name);
+        $pathName = CommonClass::getVueStudlyCase($input_path);
         $replace['DummyInputPath'] = $input_path;
         $replace['DummyPathNameTitleCase'] = $pathName;
         
