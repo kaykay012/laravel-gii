@@ -114,11 +114,11 @@ function edit{$functionName} (obj) {
             $table = $this->option('table');
         }
         do{
-            $exists = $this->existsTable($table);
+            $exists = CommonClass::existsTable($table);
             if (!$exists) {
-                $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or continue generate it.", $table);                
-                if($tableAsk === $table){
-                    break;
+                $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or exit.",'Quit');
+                if(strtolower($tableAsk) === 'quit' || strtolower($tableAsk) === 'q'){
+                    exit(0);
                 }else{
                     $table = $tableAsk;
                 }
@@ -258,19 +258,12 @@ function edit{$functionName} (obj) {
     
     public function getKeyName(string $table)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
-        $row = DB::select("SELECT column_name FROM INFORMATION_SCHEMA.`KEY_COLUMN_USAGE` WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}' AND constraint_name='PRIMARY'");
-        
-        return $row[0]->column_name ?? null;
+        return CommonClass::getKeyName($table);
     }
     
     public function existsTable(string $table)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
-        $row = DB::select("SELECT table_name FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}'");
-        return $row[0]->table_name ?? null;
+        return CommonClass::existsTable($table);
     }
     
     protected function getStub(){}

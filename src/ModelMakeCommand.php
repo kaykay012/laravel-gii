@@ -43,11 +43,11 @@ class ModelMakeCommand extends GeneratorCommand
         if ($this->option('table')) {
             $table = $this->option('table');
         }else{
-            $table = $this->getTable($name);
+            $table = CommonClass::getTable($name);
         }
         
         do{
-            $exists = $this->existsTable($table);
+            $exists = CommonClass::existsTable($table);
             if (!$exists) {
                 $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or continue generate it.", $table);                
                 if($tableAsk === $table){
@@ -200,7 +200,7 @@ class ModelMakeCommand extends GeneratorCommand
     protected function buildRulesReplacements(array $replace, $table)
     {
         $columns = CommonClass::getColumns($table);
-        $primaryKeyName = $this->getKeyName($table);
+        $primaryKeyName = CommonClass::getKeyName($table);
         
         // rules -------------------------------------
         $str = '';
@@ -250,61 +250,6 @@ class ModelMakeCommand extends GeneratorCommand
 
     protected function getDataType(string $type)
     {
-        $data_type = strtoupper($type);
-        $data = [
-            'integer' => ['TINYINT', 'SMALLINT', 'MEDIUMINT', 'INTEGER', 'INT', 'BIGINT'],
-            'numberic' => ['FLOAT', 'DOUBLE', 'DECIMAL'],
-            'date' => ['DATE'],
-            'time' => ['TIME'],
-            'year' => ['YEAR'],
-            'datetime' => ['DATETIME', 'TIMESTAMP'],
-            'string' => ['CHAR', 'VARCHAR', 'TINYTEXT', 'TEXT', 'LONGTEXT'],
-        ];
-        if (in_array($data_type, $data['integer'])) {
-            return 'integer';
-        } elseif (in_array($data_type, $data['numberic'])) {
-            return 'numberic';
-        } elseif (in_array($data_type, $data['date'])) {
-            return 'date';
-        } elseif (in_array($data_type, $data['time'])) {
-            return 'date_format:H:i:s';
-        } elseif (in_array($data_type, $data['year'])) {
-            return 'date_format:Y';
-        } elseif (in_array($data_type, $data['datetime'])) {
-            return 'datetime';
-        } else {
-            return 'string';
-        }
-    }
-    
-    /**
-     * Get the table associated with the model.
-     *
-     * @return string
-     */
-    protected function getTable($name)
-    {
-        $class = str_replace($this->getNamespace($name).'\\', '', $name);
-        return str_replace(
-            '\\', '', Str::snake(Str::plural($class))
-        );
-
-    }
-    
-    public function getKeyName(string $table)
-    {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
-        $row = DB::select("SELECT column_name FROM INFORMATION_SCHEMA.`KEY_COLUMN_USAGE` WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}' AND constraint_name='PRIMARY'");
-        
-        return $row[0]->column_name ?? null;
-    }
-    
-    public function existsTable(string $table)
-    {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
-        $row = DB::select("SELECT table_name FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}'");
-        return $row[0]->table_name ?? null;
+        return CommonClass::getDataType($type);
     }
 }
