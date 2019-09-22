@@ -114,7 +114,7 @@ function edit{$functionName} (obj) {
             $exists = CommonClass::existsTable($table);
             if (!$exists) {
                 $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or exit.",'Quit');
-                if(strtolower($tableAsk) === 'quit' || strtolower($tableAsk) === 'q'){
+                if($tableAsk === 'Quit'){
                     exit(0);
                 }else{
                     $table = $tableAsk;
