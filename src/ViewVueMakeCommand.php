@@ -2,10 +2,8 @@
 
 namespace kaykay012\laravelgii;
 
-use Illuminate\Support\Str;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
-use Illuminate\Support\Facades\DB;
 
 class ViewVueMakeCommand extends GeneratorCommand
 {
@@ -104,7 +102,6 @@ function edit{$functionName} (obj) {
      */
     protected function buildClass($name)
     {
-        // coin/ruleAward
         $input_path = $this->getNameInput();
         $pathName = CommonClass::getVueStudlyCase($input_path);
         $replace['DummyInputPath'] = $input_path;
@@ -227,35 +224,6 @@ function edit{$functionName} (obj) {
         ]);
     }
 
-    protected function getDataType(string $type)
-    {
-        $data_type = strtoupper($type);
-        $data = [
-            'integer' => ['TINYINT', 'SMALLINT', 'MEDIUMINT', 'INTEGER', 'INT', 'BIGINT'],
-            'numberic' => ['FLOAT', 'DOUBLE', 'DECIMAL'],
-            'date' => ['DATE'],
-            'time' => ['TIME'],
-            'year' => ['YEAR'],
-            'datetime' => ['DATETIME', 'TIMESTAMP'],
-            'string' => ['CHAR', 'VARCHAR', 'TINYTEXT', 'TEXT', 'LONGTEXT'],
-        ];
-        if (in_array($data_type, $data['integer'])) {
-            return 'integer';
-        } elseif (in_array($data_type, $data['numberic'])) {
-            return 'numberic';
-        } elseif (in_array($data_type, $data['date'])) {
-            return 'date';
-        } elseif (in_array($data_type, $data['time'])) {
-            return 'date_format:H:i:s';
-        } elseif (in_array($data_type, $data['year'])) {
-            return 'date_format:Y';
-        } elseif (in_array($data_type, $data['datetime'])) {
-            return 'datetime';
-        } else {
-            return 'string';
-        }
-    }
-    
     public function getKeyName(string $table)
     {
         return CommonClass::getKeyName($table);

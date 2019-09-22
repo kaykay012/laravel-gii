@@ -5,7 +5,6 @@ namespace kaykay012\laravelgii;
 use Illuminate\Support\Str;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
-use Illuminate\Support\Facades\DB;
 
 class ModelMakeCommand extends GeneratorCommand
 {
