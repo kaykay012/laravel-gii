@@ -27,6 +27,8 @@ class ViewVueMakeCommand extends GeneratorCommand
      * @var string
      */
     protected $type = 'VUE View';
+    
+    protected $table;
 
     /**
      * Execute the console command.
@@ -59,6 +61,25 @@ class ViewVueMakeCommand extends GeneratorCommand
             }
         }
 
+        if ($this->option('table')) {
+            $table = $this->option('table');
+        }
+        do{
+            $exists = CommonClass::existsTable($table);
+            if (!$exists) {
+                $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or exit.",'Quit');
+                if($tableAsk === 'Quit'){
+                    exit(0);
+                }else{
+                    $table = $tableAsk;
+                }
+            }else{
+                break;
+            }
+        }while(isset($tableAsk) && $tableAsk !== false);
+        
+        $this->table = $table;
+        
         $this->makeDirectory($form);
         $this->makeDirectory($list);
         
@@ -102,28 +123,10 @@ function edit{$functionName} (obj) {
      */
     protected function buildClass($name)
     {
-        $input_path = $this->getNameInput();
-        $pathName = CommonClass::getVueStudlyCase($input_path);
-        $replace['DummyInputPath'] = $input_path;
+        $table = $this->table;
+        $pathName = CommonClass::getVueStudlyCase($name);
+        $replace['DummyInputPath'] = $name;
         $replace['DummyPathNameTitleCase'] = $pathName;
-        
-        if ($this->option('table')) {
-            $table = $this->option('table');
-        }
-        do{
-            $exists = CommonClass::existsTable($table);
-            if (!$exists) {
-                $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or exit.",'Quit');
-                if($tableAsk === 'Quit'){
-                    exit(0);
-                }else{
-                    $table = $tableAsk;
-                }
-            }else{
-                break;
-            }
-        }while(isset($tableAsk) && $tableAsk !== false);
-        
         $replace['DummyTableName'] = $table;
         
         $replace = $this->buildRulesReplacements($replace, $table);
