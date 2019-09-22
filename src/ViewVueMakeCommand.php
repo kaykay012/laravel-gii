@@ -148,8 +148,10 @@ function edit{$functionName} (obj) {
     {
         return [
             ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists.'],
-
             ['table', 't', InputOption::VALUE_OPTIONAL, 'Generate the model with table name.'],
+            ['radio', 'radio', InputOption::VALUE_OPTIONAL, 'Generate radio input.'],
+            ['checkbox', 'checkbox', InputOption::VALUE_OPTIONAL, 'Generate checkbox input.'],
+            ['select', 'select', InputOption::VALUE_OPTIONAL, 'Generate select input.'],
         ];
     }
     
@@ -157,7 +159,15 @@ function edit{$functionName} (obj) {
     {
         $columns = CommonClass::getColumns($table);
         $primaryKeyName = $this->getKeyName($table);
-        
+        if ($this->option('radio')) {
+            $filedsRadio = explode(',',$this->option('radio'));
+        }
+        if ($this->option('checkbox')) {
+            $filedsCheckbox = explode(',',$this->option('checkbox'));
+        }
+        if ($this->option('select')) {
+            $filedsSelect = explode(',',$this->option('select'));
+        }
         // rules -------------------------------------
         $str = '';
         foreach ($columns as $column) {
@@ -165,9 +175,49 @@ function edit{$functionName} (obj) {
                 continue;
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            $COLUMN_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            $modifier = '';//修饰符
+            if(in_array($COLUMN_TYPE, ['integer','numberic'])){
+                $modifier = '.number';
+            }
+            // radio
+            if(isset($filedsRadio) && in_array($column->COLUMN_NAME, $filedsRadio)){
+                $str .= "
+        <el-form-item label=\"{$COLUMN_COMMENT}\">
+          <el-radio-group v-model=\"inputForm.{$column->COLUMN_NAME}\">
+          <el-radio :label=\"1\">备选项1</el-radio>
+          <el-radio :label=\"2\">备选项2</el-radio>
+          </el-radio-group>
+        </el-form-item>";
+                continue;
+            }
+            // checkbox
+            if(isset($filedsCheckbox) && in_array($column->COLUMN_NAME, $filedsCheckbox)){
+                $str .= "
+        <el-form-item label=\"{$COLUMN_COMMENT}\">
+          <el-checkbox-group v-model=\"inputForm.{$column->COLUMN_NAME}\">
+          <el-checkbox :label=\"1\">复选框 1</el-checkbox>
+          <el-checkbox :label=\"2\">复选框 2</el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>";
+                continue;
+            }
+            // select
+            if(isset($filedsSelect) && in_array($column->COLUMN_NAME, $filedsSelect)){
+                $str .= "
+        <el-select v-model{$modifier}=\"inputForm.{$column->COLUMN_NAME}\" clearable placeholder=\"请选择\">
+            <el-option
+              v-for=\"item in options\"
+              :key=\"item.value\"
+              :label=\"item.label\"
+              :value=\"item.value\">
+            </el-option>
+        </el-select>";
+                continue;
+            }
             $str .= "
         <el-form-item label=\"{$COLUMN_COMMENT}\">
-          <el-input type=\"text\" v-model=\"inputForm.{$column->COLUMN_NAME}\"></el-input>
+          <el-input type=\"text\" v-model{$modifier}=\"inputForm.{$column->COLUMN_NAME}\"></el-input>
         </el-form-item>";
         }
         // ------------------------------

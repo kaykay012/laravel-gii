@@ -34,7 +34,17 @@ export default {
       dialog: {
         width: '400px',
         formLabelWidth: '120px'
-      }
+      },
+      options: [{
+        value: '选项1',
+        label: '黄金糕'
+      }, {
+        value: '选项2',
+        label: '双皮奶'
+      }, {
+        value: '选项3',
+        label: '蚵仔煎'
+      }]
     }
   },
   methods: {
