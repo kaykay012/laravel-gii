@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     getDummyPathNameTitleCaseListData () {
-      adminsRequest.DummyPathNameTitleCaseList(this.searchData).then(res => {
+      adminsRequest.DummyPathNameLcfirstTitleCaseList(this.searchData).then(res => {
         if (res.data.code === 200) {
           this.loading = false
           this.listDataDummyPathNameTitleCase = res.data.data.data

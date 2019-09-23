@@ -66,7 +66,7 @@ export default {
                 }
               })
           } else {
-            adminsRequest.editDummyPathNameTitleCaseList(this.inputForm)
+            adminsRequest.editDummyPathNameTitleCase(this.inputForm)
               .then(res => {
                 if (res.data.code === 200) {
                   this.closeDialog()

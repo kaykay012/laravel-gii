@@ -123,12 +123,13 @@ function edit{$functionName} (obj) {
      */
     protected function buildClass($name)
     {
+        $inputName = $this->getNameInput();
         $table = $this->table;
-        $pathName = CommonClass::getVueStudlyCase($name);
-        $replace['DummyInputPath'] = $name;
+        $pathName = CommonClass::getVueStudlyCase($inputName);
+        $replace['DummyInputPath'] = $inputName;
         $replace['DummyPathNameTitleCase'] = $pathName;
+        $replace['DummyPathNameLcfirstTitleCase'] = lcfirst($pathName);//首字母小写
         $replace['DummyTableName'] = $table;
-        
         $replace = $this->buildRulesReplacements($replace, $table);
         $replace = $this->buildAttributesReplacements($replace, $table);
         
@@ -149,9 +150,10 @@ function edit{$functionName} (obj) {
         return [
             ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists.'],
             ['table', 't', InputOption::VALUE_OPTIONAL, 'Generate the model with table name.'],
-            ['radio', 'radio', InputOption::VALUE_OPTIONAL, 'Generate radio input.'],
-            ['checkbox', 'checkbox', InputOption::VALUE_OPTIONAL, 'Generate checkbox input.'],
-            ['select', 'select', InputOption::VALUE_OPTIONAL, 'Generate select input.'],
+            ['radio', null, InputOption::VALUE_OPTIONAL, 'Generate radio input.'],
+            ['checkbox', null, InputOption::VALUE_OPTIONAL, 'Generate checkbox input.'],
+            ['select', null, InputOption::VALUE_OPTIONAL, 'Generate select input.'],
+            ['cut', null, InputOption::VALUE_NONE, '缩减`字段注释`(自动删除空格/冒号后面的字符).'],
         ];
     }
     
@@ -175,6 +177,9 @@ function edit{$functionName} (obj) {
                 continue;
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            if ($this->option('cut')) {
+                $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT, [' ',':','：']);
+            }
             $COLUMN_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             $modifier = '';//修饰符
             if(in_array($COLUMN_TYPE, ['integer','numberic'])){
@@ -239,7 +244,11 @@ function edit{$functionName} (obj) {
             if($primaryKeyName === $column->COLUMN_NAME){
                 continue;
             }
+            $COLUMN_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            if ($this->option('cut')) {
+                $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT, [' ',':','：']);
+            }
             if($n > 2){
                 $str .='
         <!-- ';
@@ -264,7 +273,8 @@ function edit{$functionName} (obj) {
                 $str_search .=  "
         ";
             }
-            $str_search .= "{$column->COLUMN_NAME}: '{$column->COLUMN_DEFAULT}'";
+            $COLUMN_DEFAULT = in_array($COLUMN_TYPE, ['integer','numberic']) ? $column->COLUMN_DEFAULT : "'{$column->COLUMN_DEFAULT}'";
+            $str_search .= "{$column->COLUMN_NAME}: $COLUMN_DEFAULT";
             
             ++$n;
         }

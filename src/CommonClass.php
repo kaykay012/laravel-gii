@@ -165,4 +165,23 @@ class CommonClass
             return 'string';
         }
     }
+    
+    /**
+     * 返回字符串中给定值之前的所有内容
+     * @param type $subject
+     * @param type $search
+     * @return type
+     */
+    public static function strBefore($subject, $search)
+    {
+        if(is_string($search)){
+            $datas[] = $search;
+        }else{
+            $datas = $search;
+        }
+        foreach ($datas as $data){
+            $subject = str_before($subject, $data);
+        }
+        return $subject;
+    }
 }
