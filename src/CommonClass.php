@@ -172,8 +172,11 @@ class CommonClass
      * @param type $search
      * @return type
      */
-    public static function strBefore($subject, $search)
+    public static function strBefore($subject, $search=null)
     {
+        if($search === null){
+            $search = [' ',':','：'];
+        }
         if(is_string($search)){
             $datas[] = $search;
         }else{

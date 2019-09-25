@@ -17,7 +17,8 @@
       </el-form>
     </div>
     <div class="table_container">
-      <el-table :data="listDataDummyPathNameTitleCase" v-loading="loading" style="width: 100%" align="center">DummyList
+      <el-table :data="listDataDummyPathNameTitleCase" v-loading="loading" style="width: 100%" align="center">
+        <el-table-column label="编号" prop="id" align="center"></el-table-column>DummyList
         <el-table-column fixed="right" label="操作" align="center" width="240">
           <template slot-scope="scope">
             <el-button

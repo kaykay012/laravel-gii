@@ -178,7 +178,7 @@ function edit{$functionName} (obj) {
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
             if ($this->option('cut')) {
-                $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT, [' ',':','：']);
+                $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT);
             }
             $COLUMN_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             $modifier = '';//修饰符
@@ -236,7 +236,9 @@ function edit{$functionName} (obj) {
     {
         $columns = CommonClass::getColumns($table);
         $primaryKeyName = $this->getKeyName($table);
-        
+        if ($this->option('radio')) {
+            $filedsRadio = explode(',',$this->option('radio'));
+        }
         // attributes ----------------------------------
         $str_search = $str_list = $str = "";
         $n = 1;
@@ -264,7 +266,17 @@ function edit{$functionName} (obj) {
             }
             
             $str_list .= "
-        <el-table-column label=\"{$COLUMN_COMMENT}\" prop=\"{$column->COLUMN_NAME}\" align=\"center\"></el-table-column>";
+        <el-table-column label=\"{$COLUMN_COMMENT}\" prop=\"{$column->COLUMN_NAME}\" align=\"center\">";
+            // radio
+            if(isset($filedsRadio) && in_array($column->COLUMN_NAME, $filedsRadio)){
+                $str_list .= "
+          <template slot-scope=\"scope\">
+            <span v-if=\"scope.row.status === 1\">启用</span>
+            <span v-else>禁用</span>
+          </template>";
+            }
+            $str_list .= "
+        </el-table-column>";
             
             if($n > 1){
                 $str_search .=  ",
