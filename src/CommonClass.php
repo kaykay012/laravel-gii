@@ -9,6 +9,7 @@
 namespace kaykay012\laravelgii;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Description of CommonClass
@@ -103,11 +104,12 @@ class CommonClass
      */
     public static function getTable($name)
     {
-        $class = str_replace($this->getNamespace($name).'\\', '', $name);
+        $name_space = trim(implode('\\', array_slice(explode('\\', $name), 0, -1)), '\\');
+        $class = str_replace($name_space.'\\', '', $name);
         return str_replace(
             '\\', '', Str::snake(Str::plural($class))
         );
-
+        
     }
     
     /**
@@ -175,7 +177,7 @@ class CommonClass
     public static function strBefore($subject, $search=null)
     {
         if($search === null){
-            $search = [' ',':','：'];
+            $search = [' ', ':', '：', '，', ','];
         }
         if(is_string($search)){
             $datas[] = $search;

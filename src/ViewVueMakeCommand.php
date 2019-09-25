@@ -103,6 +103,22 @@ function {$functionNameLcfirst}List (obj) {
     })
 }");
         $this->info("
+function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
+  var data = {
+    url: '{$api_url_path}/index',
+    method: 'GET',
+    params: obj
+  }
+  if (ext !== false) {
+    Object.assign(data, ext)
+  }
+  if (exportExcel !== false) {
+    Object.assign(data, { responseType: 'blob' })
+    Object.assign(data, ext)
+  }
+  return request(data)
+}");
+        $this->info("
 function edit{$functionName} (obj) {
     return request({
       url: '{$api_url_path}/update',
@@ -286,7 +302,7 @@ function edit{$functionName} (obj) {
         ";
             }
             $COLUMN_DEFAULT = in_array($COLUMN_TYPE, ['integer','numberic']) ? $column->COLUMN_DEFAULT : "'{$column->COLUMN_DEFAULT}'";
-            $str_search .= "{$column->COLUMN_NAME}: $COLUMN_DEFAULT";
+            $str_search .= "{$column->COLUMN_NAME}: ''";
             
             ++$n;
         }

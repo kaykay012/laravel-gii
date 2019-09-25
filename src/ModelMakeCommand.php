@@ -193,6 +193,8 @@ class ModelMakeCommand extends GeneratorCommand
             ['resource', 'r', InputOption::VALUE_NONE, 'Indicates if the generated controller should be a resource controller.'],
             
             ['table', 't', InputOption::VALUE_OPTIONAL, 'Generate the model with table name.'],
+            
+            ['cut', null, InputOption::VALUE_NONE, '缩减`字段注释`(自动删除空格/冒号后面的字符).'],
         ];
     }
     
@@ -237,6 +239,9 @@ class ModelMakeCommand extends GeneratorCommand
         $str = "";
         foreach($columns as $column){
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            if ($this->option('cut')) {
+                $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT);
+            }
             $str .= "
             '{$column->COLUMN_NAME}' => '{$COLUMN_COMMENT}',";
         }
