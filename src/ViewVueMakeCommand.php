@@ -322,7 +322,7 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
                 $str_search .=  "
         ";
             }
-            $str_search .= "{$column->COLUMN_NAME}: ''";
+            $str_search .= "{$column->COLUMN_NAME}: null";
             
             if($n > 1){
                 if(!in_array($column->COLUMN_NAME, ['created_at','updated_at','deleted_at'])){
