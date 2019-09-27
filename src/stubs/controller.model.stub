@@ -17,7 +17,7 @@ class DummyClass extends Controller
      */
     public function index(Request $request)
     {
-        $model = DummyModelClass::orderBy($request->input('sort', 'DummyPrimaryKeyName'), $request->input('sortBy', 'DESC'));
+        $model = DummyModelClass::orderBy(($request->sort?:'DummyPrimaryKeyName'), ($request->sortBy?:'DESC'));
         DummySearchCondition
         if(isset($request->page) && $request->page <= 0){
             $rows = $model->limit(10)->get();
@@ -67,7 +67,7 @@ class DummyClass extends Controller
         if ($validator->fails()) {
             return ['code' => 40001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $DummyModelVariable->fill($user->onlyCustomAttributes($request->all()));
+        $DummyModelVariable->fill($DummyModelVariable->onlyCustomAttributes($request->all()));
         if($DummyModelVariable->save())
         {
             return ['code' => 200, 'msg' => __('common.Success'), 'data' => $DummyModelVariable];

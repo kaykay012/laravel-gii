@@ -11,9 +11,10 @@
           <el-button type="primary" size="mini" icon="search" @click="getDummyPathNameTitleCaseListData()">查询</el-button>
         </el-form-item>
 
-        <el-form-item class="btnRight">
+        <el-form-item style="float:right;">
           <el-button type="primary" size="mini" icon="view" @click="showDialogDummyPathNameTitleCase('add',{})">添加</el-button>
         </el-form-item>
+        <div style="clear:both;"></div>
       </el-form>
     </div>
     <div class="table_container">

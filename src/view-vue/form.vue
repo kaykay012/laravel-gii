@@ -29,7 +29,7 @@ export default {
     return {
       dialogStatus: this.isShow,
       actionType: this.dialogType,
-      inputForm: {DummySearchParams
+      inputForm: {DummyInputParams
       },
       dialog: {
         width: '400px',
@@ -55,7 +55,7 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           if (this.actionType === 'add') {
-            adminsRequest.addDummyPathNameTitleCaseList(this.inputForm)
+            adminsRequest.createDummyPathNameTitleCase(this.inputForm)
               .then(res => {
                 if (res.data.code === 200) {
                   this.closeDialog()

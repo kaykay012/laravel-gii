@@ -92,20 +92,45 @@ class ViewVueMakeCommand extends GeneratorCommand
 
         $this->info($this->type."`{$form}` created successfully.");
         $this->info($this->type."`{$list}` created successfully.");
-        $this->info('');
+        
+        
+        if($this->hasOption('apiPre')){
+            $apiPre = $this->option('apiPre').'/';
+        }else{
+            $apiPre = '';
+        }
         
         $this->info("
 function {$functionNameLcfirst}List (obj) {
     return request({
-      url: '{$api_url_path}/index',
+      url: '{$apiPre}{$api_url_path}/index',
       method: 'GET',
       params: obj
     })
 }");
+      
+        $this->info("
+function create{$functionName} (obj) {
+    return request({
+      url: '{$apiPre}{$api_url_path}/create',
+      method: 'POST',
+      params: obj
+    })
+}");
+      
+        $this->info("
+function edit{$functionName} (obj) {
+    return request({
+      url: '{$apiPre}{$api_url_path}/update',
+      method: 'POST',
+      params: obj
+    })
+}");
+        
         $this->info("
 function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
   var data = {
-    url: '{$api_url_path}/index',
+    url: '{$apiPre}{$api_url_path}/index',
     method: 'GET',
     params: obj
   }
@@ -118,15 +143,6 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
   }
   return request(data)
 }");
-        $this->info("
-function edit{$functionName} (obj) {
-    return request({
-      url: '{$api_url_path}/update',
-      method: 'POST',
-      params: obj
-    })
-}");
-        $this->info('');
     }
     
     /**
@@ -170,6 +186,7 @@ function edit{$functionName} (obj) {
             ['checkbox', null, InputOption::VALUE_OPTIONAL, 'Generate checkbox input.'],
             ['select', null, InputOption::VALUE_OPTIONAL, 'Generate select input.'],
             ['cut', null, InputOption::VALUE_NONE, '缩减`字段注释`(自动删除空格/冒号后面的字符).'],
+            ['apiPre', null, InputOption::VALUE_OPTIONAL, 'API url 前缀'],
         ];
     }
     
@@ -190,6 +207,9 @@ function edit{$functionName} (obj) {
         $str = '';
         foreach ($columns as $column) {
             if($primaryKeyName === $column->COLUMN_NAME){
+                continue;
+            }
+            if(in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
                 continue;
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
@@ -256,7 +276,7 @@ function edit{$functionName} (obj) {
             $filedsRadio = explode(',',$this->option('radio'));
         }
         // attributes ----------------------------------
-        $str_search = $str_list = $str = "";
+        $str_input = $str_search = $str_list = $str = "";
         $n = 1;
         foreach($columns as $column){
             if($primaryKeyName === $column->COLUMN_NAME){
@@ -287,8 +307,8 @@ function edit{$functionName} (obj) {
             if(isset($filedsRadio) && in_array($column->COLUMN_NAME, $filedsRadio)){
                 $str_list .= "
           <template slot-scope=\"scope\">
-            <span v-if=\"scope.row.status === 1\">启用</span>
-            <span v-else>禁用</span>
+            <span v-if=\"scope.row.{$column->COLUMN_NAME} === 1\">备选项1</span>
+            <span v-else>备选项2</span>
           </template>";
             }
             $str_list .= "
@@ -297,21 +317,32 @@ function edit{$functionName} (obj) {
             if($n > 1){
                 $str_search .=  ",
         ";
+                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
+                $str_input .=  ",
+        ";
+                }
             }else{
                 $str_search .=  "
         ";
+                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
+                $str_input .=  "
+        ";
+                }
             }
             $COLUMN_DEFAULT = in_array($COLUMN_TYPE, ['integer','numberic']) ? $column->COLUMN_DEFAULT : "'{$column->COLUMN_DEFAULT}'";
             $str_search .= "{$column->COLUMN_NAME}: ''";
+            if(!in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
+                $str_input .= "{$column->COLUMN_NAME}: {$COLUMN_DEFAULT}";
+            }
             
             ++$n;
         }
         // ------------------------------------------
-        
         return array_merge($replace, [
             'DummySearchInput' => $str,
             'DummyList' => $str_list,
             'DummySearchParams' => $str_search,
+            'DummyInputParams' => $str_input,
         ]);
     }
 

@@ -145,10 +145,9 @@ class CommonClass
         $data = [
             'integer' => ['TINYINT', 'SMALLINT', 'MEDIUMINT', 'INTEGER', 'INT', 'BIGINT'],
             'numberic' => ['FLOAT', 'DOUBLE', 'DECIMAL'],
-            'date' => ['DATE'],
+            'date' => ['DATE', 'DATETIME', 'TIMESTAMP'],
             'time' => ['TIME'],
             'year' => ['YEAR'],
-            'datetime' => ['DATETIME', 'TIMESTAMP'],
             'string' => ['CHAR', 'VARCHAR', 'TINYTEXT', 'TEXT', 'LONGTEXT'],
         ];
         if (in_array($data_type, $data['integer'])) {
@@ -161,9 +160,7 @@ class CommonClass
             return 'date_format:H:i:s';
         } elseif (in_array($data_type, $data['year'])) {
             return 'date_format:Y';
-        } elseif (in_array($data_type, $data['datetime'])) {
-            return 'datetime';
-        } else {
+        }else {
             return 'string';
         }
     }
