@@ -173,13 +173,16 @@ class CommonClass
      */
     public static function strBefore($subject, $search=null)
     {
+        $pun = [' ', ':', '：', '，', ','];
         if($search === null){
-            $search = [' ', ':', '：', '，', ','];
-        }
-        if(is_string($search)){
-            $datas[] = $search;
+            $datas = $pun;
         }else{
-            $datas = $search;
+            if(is_string($search)){
+                $datas[] = $search;
+            }else{
+                $datas = $search;
+            }
+            $datas = array_merge_recursive($datas, $pun);
         }
         foreach ($datas as $data){
             $subject = str_before($subject, $data);

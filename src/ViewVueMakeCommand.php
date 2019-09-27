@@ -287,6 +287,7 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
             if ($this->option('cut')) {
                 $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT, [' ',':','：']);
             }
+            $COLUMN_DEFAULT = in_array($COLUMN_TYPE, ['integer','numberic']) ? $column->COLUMN_DEFAULT : "'{$column->COLUMN_DEFAULT}'";
             if($n > 2){
                 $str .='
         <!-- ';
@@ -317,21 +318,24 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
             if($n > 1){
                 $str_search .=  ",
         ";
-                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
+            }else{
+                $str_search .=  "
+        ";
+            }
+            $str_search .= "{$column->COLUMN_NAME}: ''";
+            
+            if($n > 1){
+                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at','deleted_at'])){
                 $str_input .=  ",
         ";
                 }
             }else{
-                $str_search .=  "
-        ";
-                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
+                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at','deleted_at'])){
                 $str_input .=  "
         ";
                 }
             }
-            $COLUMN_DEFAULT = in_array($COLUMN_TYPE, ['integer','numberic']) ? $column->COLUMN_DEFAULT : "'{$column->COLUMN_DEFAULT}'";
-            $str_search .= "{$column->COLUMN_NAME}: ''";
-            if(!in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
+            if(!in_array($column->COLUMN_NAME, ['created_at','updated_at','deleted_at'])){
                 $str_input .= "{$column->COLUMN_NAME}: {$COLUMN_DEFAULT}";
             }
             
