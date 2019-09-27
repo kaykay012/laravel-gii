@@ -29,6 +29,7 @@ class ViewVueMakeCommand extends GeneratorCommand
     protected $type = 'VUE View';
     
     protected $table;
+    protected $ignore_fields = ['created_at', 'updated_at', 'deleted_at'];
 
     /**
      * Execute the console command.
@@ -204,12 +205,12 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
             $filedsSelect = explode(',',$this->option('select'));
         }
         // rules -------------------------------------
-        $str = '';
+        $str_input = $str = '';
         foreach ($columns as $column) {
             if($primaryKeyName === $column->COLUMN_NAME){
                 continue;
             }
-            if(in_array($column->COLUMN_NAME, ['created_at','updated_at'])){
+            if(in_array($column->COLUMN_NAME, $this->ignore_fields)){
                 continue;
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
@@ -217,10 +218,18 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
                 $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT);
             }
             $COLUMN_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            $COLUMN_DEFAULT = in_array($COLUMN_TYPE, ['integer','numberic']) ? $column->COLUMN_DEFAULT : "'{$column->COLUMN_DEFAULT}'";
             $modifier = '';//修饰符
             if(in_array($COLUMN_TYPE, ['integer','numberic'])){
                 $modifier = '.number';
             }
+            
+            /*
+             * Form Input default value
+             */
+            $str_input .= "
+        {$column->COLUMN_NAME}: {$COLUMN_DEFAULT},";
+            
             // radio
             if(isset($filedsRadio) && in_array($column->COLUMN_NAME, $filedsRadio)){
                 $str .= "
@@ -265,6 +274,7 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
         
         return array_merge($replace, [
             'DummyRules' => $str,
+            'DummyInputParams' => rtrim($str_input,','),
         ]);
     }
     
@@ -276,32 +286,34 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
             $filedsRadio = explode(',',$this->option('radio'));
         }
         // attributes ----------------------------------
-        $str_input = $str_search = $str_list = $str = "";
+        $str_search = $str_list = $str = "";
         $n = 1;
         foreach($columns as $column){
             if($primaryKeyName === $column->COLUMN_NAME){
                 continue;
             }
-            $COLUMN_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
             if ($this->option('cut')) {
                 $COLUMN_COMMENT = CommonClass::strBefore($COLUMN_COMMENT, [' ',':','：']);
             }
-            $COLUMN_DEFAULT = in_array($COLUMN_TYPE, ['integer','numberic']) ? $column->COLUMN_DEFAULT : "'{$column->COLUMN_DEFAULT}'";
+            
+            $html_comment_begin = $html_comment_end = '';
             if($n > 2){
-                $str .='
-        <!-- ';
-            }else{
-                $str .="
-        ";
-            }
-            $str .= "<el-form-item label=\"{$COLUMN_COMMENT}\">
-          <el-input v-model=\"searchData.{$column->COLUMN_NAME}\" placeholder></el-input>
-        </el-form-item>";
-            if($n > 2){
-                $str .=' -->';
+                $html_comment_begin = '<!-- ';
+                $html_comment_end = ' -->';
             }
             
+            /*
+             * search Form Input
+             */
+            $str .= "
+        {$html_comment_begin}<el-form-item label=\"{$COLUMN_COMMENT}\">
+          <el-input v-model=\"searchData.{$column->COLUMN_NAME}\" placeholder></el-input>
+        </el-form-item>{$html_comment_end}";
+            
+            /*
+             *  table list
+             */
             $str_list .= "
         <el-table-column label=\"{$COLUMN_COMMENT}\" prop=\"{$column->COLUMN_NAME}\" align=\"center\">";
             // radio
@@ -315,29 +327,11 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
             $str_list .= "
         </el-table-column>";
             
-            if($n > 1){
-                $str_search .=  ",
-        ";
-            }else{
-                $str_search .=  "
-        ";
-            }
-            $str_search .= "{$column->COLUMN_NAME}: null";
-            
-            if($n > 1){
-                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at','deleted_at'])){
-                $str_input .=  ",
-        ";
-                }
-            }else{
-                if(!in_array($column->COLUMN_NAME, ['created_at','updated_at','deleted_at'])){
-                $str_input .=  "
-        ";
-                }
-            }
-            if(!in_array($column->COLUMN_NAME, ['created_at','updated_at','deleted_at'])){
-                $str_input .= "{$column->COLUMN_NAME}: {$COLUMN_DEFAULT}";
-            }
+            /*
+             * Search Params
+             */
+            $str_search .= "
+        {$column->COLUMN_NAME}: null,";
             
             ++$n;
         }
@@ -345,8 +339,7 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
         return array_merge($replace, [
             'DummySearchInput' => $str,
             'DummyList' => $str_list,
-            'DummySearchParams' => $str_search,
-            'DummyInputParams' => $str_input,
+            'DummySearchParams' => rtrim($str_search,','),
         ]);
     }
 
