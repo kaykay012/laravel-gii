@@ -17,7 +17,7 @@ class DummyClass extends Controller
      */
     public function index(Request $request)
     {
-        $model = DummyModelClass::orderBy(($request->sort?:'DummyPrimaryKeyName'), ($request->sortBy?:'DESC'));
+        $model = DummyModelClass::orderBy('DummyPrimaryKeyName', 'DESC');
         DummySearchCondition
         if(isset($request->page) && $request->page <= 0){
             $rows = $model->limit(10)->get();
