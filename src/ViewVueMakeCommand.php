@@ -115,7 +115,7 @@ function create{$functionName} (obj) {
     return request({
       url: '{$apiPre}{$api_url_path}/create',
       method: 'POST',
-      params: obj
+      data: obj
     })
 }");
       
@@ -124,7 +124,7 @@ function edit{$functionName} (obj) {
     return request({
       url: '{$apiPre}{$api_url_path}/update',
       method: 'POST',
-      params: obj
+      data: obj
     })
 }");
         

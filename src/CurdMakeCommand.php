@@ -140,7 +140,7 @@ class CurdMakeCommand extends GeneratorCommand
 
         if (!class_exists($modelClass)) {
             if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
-                $this->call('make:model-rule', ['name' => $modelClass]);
+                $this->call('make:model-rule', ['name' => $modelClass,'--cut' => true]);
                 $path = CommonClass::getModelPath($modelClass);
                 require_once base_path(). '/app/'.$path.'.php';
             }else{
