@@ -24,7 +24,7 @@ class DummyClass extends Controller
         }else{
             $rows = $model->paginate();
         }
-        //$rows->makeHidden(['updated_at']);
+        //$rows->makeHidden(['deleted_at']);
         return ['code' => 200, 'msg' => __('common.Success'), 'data' => $rows];
     }
 
