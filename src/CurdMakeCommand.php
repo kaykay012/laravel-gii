@@ -42,6 +42,7 @@ class CurdMakeCommand extends GeneratorCommand
         $controller_name = str_replace('/', '\\', $input_name);
         $this->info('');
         $this->info("Route::get('{$url_path}/index', '{$controller_name}@index');");
+        $this->info("Route::get('{$url_path}/show', '{$controller_name}@show');");
         $this->info("Route::post('{$url_path}/create', '{$controller_name}@create');");
         $this->info("Route::post('{$url_path}/update', '{$controller_name}@update');");
         $this->info("Route::post('{$url_path}/destroy', '{$controller_name}@destroy');");
