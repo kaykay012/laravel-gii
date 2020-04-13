@@ -51,4 +51,16 @@ class DummyClass extends Model
         $attributes = $this->customAttributes();
         return collect($data)->except($except)->only(array_keys($attributes))->except($except)->toArray();
     }
+    
+    /**
+     * Fill the model with an array of attributes.
+     * @param type $attributes
+     * @return $this
+     */
+    public function fill($attributes)
+    {
+        $onlyCustomAttributes = $this->onlyCustomAttributes($attributes);
+        parent::fill($onlyCustomAttributes);
+        return $this;
+    }
 }
