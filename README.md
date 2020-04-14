@@ -20,7 +20,7 @@ php artisan make:model-rule Models/User --table=users
 php artisan make:curd CurdController --model=App\\Models\\User
 ```
 
-创建 api Wiki 文档
+创建 api Wiki 文档.
 ```
 php artisan make:wiki Admin/CurdController --model=App\\Models\\User
 ```
