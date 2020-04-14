@@ -64,10 +64,14 @@ class CurdMakeCommand extends GeneratorCommand
         
         //postman 参数
         $str = '';
+        $str_json = [];
         foreach ($this->columns as $key=>$column) {
             $str .= "{$column->COLUMN_NAME}:\n";
+            $str_json[$column->COLUMN_NAME] = "";
         }
+        
         $this->info($str);
+        $this->info(json_encode($str_json));
     }
     
     /**
@@ -232,10 +236,10 @@ class CurdMakeCommand extends GeneratorCommand
             //单字段唯一索引
             if($column->COLUMN_KEY === 'UNI'){
                 $uniqueRule .= "
-                '{$column->COLUMN_NAME}' => ['unique:{$table}'],";
+            '{$column->COLUMN_NAME}' => ['unique:{$table}'],";
             
                 $uniqueRuleUpdate .= "
-                '".$column->COLUMN_NAME."' => [Rule::unique('".$table."')->ignore(".'$request->id'.")],";
+            '".$column->COLUMN_NAME."' => [Rule::unique('".$table."')->ignore(".'$request->id'.")],";
             }
             //多字段唯一索引
             if($column->COLUMN_KEY === 'MUL'){
@@ -246,7 +250,7 @@ class CurdMakeCommand extends GeneratorCommand
                 foreach ($fields as $field){
                     
                     $uniqueRule .= "
-                '".$field."' => [Rule::unique('".$table."')";
+            '".$field."' => [Rule::unique('".$table."')";
                     
                     $fields_except = $fields->reject(function ($value, $key) use($field) {
                         return $value === $field;
@@ -261,7 +265,7 @@ class CurdMakeCommand extends GeneratorCommand
                     //===========================
                     
                     $uniqueRuleUpdate .= "
-                '".$field."' => [Rule::unique('".$table."')";
+            '".$field."' => [Rule::unique('".$table."')";
                     
                     $fields_except = $fields->reject(function ($value, $key) use($field) {
                         return $value === $field;

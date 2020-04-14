@@ -51,7 +51,7 @@ class DummyClass extends Controller
     }
     
     /**
-     * Show the form for creating a new resource.
+     * Store a newly created resource in storage.
      *
      * @return \Illuminate\Http\Response
      */
@@ -92,11 +92,11 @@ class DummyClass extends Controller
         if ($validator->fails()) {
             return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $model = $DummyModelVariable::where('id', $request->id);
-        $data = $DummyModelVariable->onlyCustomAttributes($request->all());
-        if($model->update($data))
+        $model = $DummyModelVariable::find($request->id);
+        $model->fill($request->all());
+        if($model->save())
         {
-            return ['code' => 200, 'message' => __('common.Success'), 'data' => $model->first()];
+            return ['code' => 200, 'message' => __('common.Success'), 'data' => $model];
         }else{
             return ['code' => 5001, 'message' => __('common.Server internal error')];
         }

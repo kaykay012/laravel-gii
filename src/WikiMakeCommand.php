@@ -37,6 +37,9 @@ class WikiMakeCommand extends GeneratorCommand
     private $url_path_create;
     private $url_path_update;
     private $url_path_destroy;
+    
+    private $expect_files_create = ['id', 'created_at', 'updated_at'];
+    private $expect_files_update = ['created_at', 'updated_at'];
 
     public function handle()
     {
@@ -149,6 +152,9 @@ class WikiMakeCommand extends GeneratorCommand
         
         $str = '';
         foreach($this->columns as $column){
+            if(collect($this->expect_files_create)->search($column->COLUMN_NAME) !== false){
+                continue;
+            }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
             $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
@@ -158,8 +164,16 @@ class WikiMakeCommand extends GeneratorCommand
         $row = $this->getRowData();
         $str2 = '';
         foreach ($row as $key=>$value){
+            if(is_array($value)){
+                $value = json_encode($value);
+            }
+            if(is_numeric($value)){
+                $value = floatval($value);
+            }else{
+                $value = "\"{$value}\"";
+            }
             $str2 .= "
-        \"{$key}\": \"{$value}\", //{$comments[$key]->COLUMN_COMMENT}";
+        \"{$key}\": {$value}, //{$comments[$key]->COLUMN_COMMENT}";
         }
         $replace['DummyFormData'] = $str;
         $replace['DummyRowDetail'] = $str2;
@@ -177,6 +191,9 @@ class WikiMakeCommand extends GeneratorCommand
         
         $str = '';
         foreach($this->columns as $column){
+            if(collect($this->expect_files_update)->search($column->COLUMN_NAME) !== false){
+                continue;
+            }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
             $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
@@ -186,8 +203,16 @@ class WikiMakeCommand extends GeneratorCommand
         $row = $this->getRowData();
         $str2 = '';
         foreach ($row as $key=>$value){
+            if(is_array($value)){
+                $value = json_encode($value);
+            }
+            if(is_numeric($value)){
+                $value = floatval($value);
+            }else{
+                $value = "\"{$value}\"";
+            }
             $str2 .= "
-        \"{$key}\": \"{$value}\", //{$comments[$key]->COLUMN_COMMENT}";
+        \"{$key}\": {$value}, //{$comments[$key]->COLUMN_COMMENT}";
         }
         $replace['DummyFormData'] = $str;
         $replace['DummyRowDetail'] = $str2;
@@ -215,8 +240,16 @@ class WikiMakeCommand extends GeneratorCommand
         $row = $this->getRowData();
         $str2 = '';
         foreach ($row as $key=>$value){
+            if(is_array($value)){
+                $value = json_encode($value);
+            }
+            if(is_numeric($value)){
+                $value = floatval($value);
+            }else{
+                $value = "\"{$value}\"";
+            }
             $str2 .= "
-        \"{$key}\": \"{$value}\", //{$comments[$key]->COLUMN_COMMENT}";
+        \"{$key}\": {$value}, //{$comments[$key]->COLUMN_COMMENT}";
         }
         $replace['DummyRowDetail'] = $str2;
         
@@ -247,8 +280,16 @@ class WikiMakeCommand extends GeneratorCommand
             $str2 .= '
             {';
             foreach($row as $key=>$value){
+                if(is_array($value)){
+                    $value = json_encode($value);
+                }
+                if(is_numeric($value)){
+                    $value = floatval($value);
+                }else{
+                    $value = "\"{$value}\"";
+                }
             $str2 .= "
-                \"{$key}\": \"{$value}\",";
+                \"{$key}\": {$value},";
                 if($rk ==0){
                     $str2 .= " //{$comments[$key]->COLUMN_COMMENT}";
                 }
