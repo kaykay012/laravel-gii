@@ -25,7 +25,7 @@ class DummyClass extends Controller
             $rows = $model->paginate();
         }
         //$rows->makeHidden(['deleted_at']);
-        return ['code' => 200, 'msg' => __('common.Success'), 'data' => $rows];
+        return ['code' => 200, 'message' => __('common.Success'), 'data' => $rows];
     }
 
     /**
@@ -40,13 +40,13 @@ class DummyClass extends Controller
             'id' => ['required', 'integer', Rule::exists('DummyTableName')],
         ]);
         if ($validator->fails()) {
-            return ['code' => 3001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
         $model = DummyModelClass::find($request->id);
         if($model){
-            return ['code' => 200, 'msg' => __('common.Success'), 'data' => $model];
+            return ['code' => 200, 'message' => __('common.Success'), 'data' => $model];
         }else{
-            return ['code' => 5001, 'msg' => __('common.Server internal error')];
+            return ['code' => 5001, 'message' => __('common.Server internal error')];
         }
     }
     
@@ -63,14 +63,14 @@ class DummyClass extends Controller
         $customAttributes = $DummyModelVariable->customAttributes();
         $validator = Validator::make($request->all(), $rules, $messages, $customAttributes);
         if ($validator->fails()) {
-            return ['code' => 3001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
         $DummyModelVariable->fill($request->all());
         if($DummyModelVariable->save())
         {
-            return ['code' => 200, 'msg' => __('common.Success'), 'data' => $DummyModelVariable];
+            return ['code' => 200, 'message' => __('common.Success'), 'data' => $DummyModelVariable];
         }else{
-            return ['code' => 5001, 'msg' => __('common.Server internal error')];
+            return ['code' => 5001, 'message' => __('common.Server internal error')];
         }
     }
 
@@ -90,15 +90,15 @@ class DummyClass extends Controller
         $customAttributes = $DummyModelVariable->customAttributes();
         $validator = Validator::make($request->all(), $rules, $messages, $customAttributes);
         if ($validator->fails()) {
-            return ['code' => 3001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
         $model = $DummyModelVariable::where('id', $request->id);
         $data = $DummyModelVariable->onlyCustomAttributes($request->all());
         if($model->update($data))
         {
-            return ['code' => 200, 'msg' => __('common.Success'), 'data' => $model->first()];
+            return ['code' => 200, 'message' => __('common.Success'), 'data' => $model->first()];
         }else{
-            return ['code' => 5001, 'msg' => __('common.Server internal error')];
+            return ['code' => 5001, 'message' => __('common.Server internal error')];
         }
     }
 
@@ -114,13 +114,13 @@ class DummyClass extends Controller
             'id' => ['required', 'array'],
         ]);
         if ($validator->fails()) {
-            return ['code' => 3001, 'msg' => $validator->errors()->first(), 'data' => $validator->errors()];
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
         $model = DummyModelClass::whereIn('DummyPrimaryKeyName', is_array($request->id) ? $request->id : [$request->id]);
         if($model->delete()){
-            return ['code' => 200, 'msg' => __('common.Success')];
+            return ['code' => 200, 'message' => __('common.Success')];
         }else{
-            return ['code' => 5001, 'msg' => __('common.Server internal error')];
+            return ['code' => 5001, 'message' => __('common.Server internal error')];
         }
     }
 }

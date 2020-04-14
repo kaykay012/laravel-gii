@@ -16,6 +16,7 @@ class ServiceProvider extends LaravelServiceProvider
             CurdMakeCommand::class,
             ModelMakeCommand::class,
             ViewVueMakeCommand::class,
+            WikiMakeCommand::class,
         ]);
     }
 
@@ -36,6 +37,7 @@ class ServiceProvider extends LaravelServiceProvider
             CurdMakeCommand::class,
             ModelMakeCommand::class,
             ViewVueMakeCommand::class,
+            WikiMakeCommand::class,
         ];
     }
 

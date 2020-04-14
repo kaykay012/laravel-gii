@@ -30,7 +30,7 @@
 ```
 {
     "code": 200,
-    "msg": "common.Success",
+    "message": "common.Success",
     "data": {
         "current_page": 1, //当前页
         "data": [DummyRowDetail

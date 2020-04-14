@@ -7,7 +7,7 @@ use InvalidArgumentException;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
-class CurdMakeCommand extends GeneratorCommand
+class WikiMakeCommand extends GeneratorCommand
 {
 
     /**
@@ -15,21 +15,21 @@ class CurdMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $name = 'make:curd';
+    protected $name = 'make:wiki';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create CURD logic.';
+    protected $description = 'Create api wiki.';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'Controller';
+    protected $type = 'wiki';
     
     private $columns;
     private $url_path_index;
@@ -40,7 +40,7 @@ class CurdMakeCommand extends GeneratorCommand
 
     public function handle()
     {
-        if (parent::handle() === false && ! $this->option('force')) {
+        if (! $this->option('force')) {
             return;
         }
         $input_name = $this->getNameInput();
@@ -54,20 +54,9 @@ class CurdMakeCommand extends GeneratorCommand
         $this->url_path_update = "{$url_path}/update";
         $this->url_path_destroy = "{$url_path}/destroy";
         
-        $this->info('');
-        $this->info("Route::get('{$this->url_path_index}', '{$controller_name}@index');");
-        $this->info("Route::get('{$this->url_path_show}', '{$controller_name}@show');");
-        $this->info("Route::post('{$this->url_path_create}', '{$controller_name}@create');");
-        $this->info("Route::post('{$this->url_path_update}', '{$controller_name}@update');");
-        $this->info("Route::post('{$this->url_path_destroy}', '{$controller_name}@destroy');");
-        $this->info("\n");
+        $this->createWiki();
         
-        //postman 参数
-        $str = '';
-        foreach ($this->columns as $key=>$column) {
-            $str .= "{$column->COLUMN_NAME}:\n";
-        }
-        $this->info($str);
+        $this->info('Api Wiki created successfully.');
     }
     
     /**
@@ -129,6 +118,169 @@ class CurdMakeCommand extends GeneratorCommand
         );
     }
     
+    protected function createWiki()
+    {
+        $input_name = $this->getNameInput();
+        $name = $this->qualifyClass($input_name);
+        $url_path = CommonClass::getRoutePathName($name);
+        
+        $modelClass = $this->parseModel($this->option('model'));
+        
+        $obj = new $modelClass();
+        $table = $obj->getTable();
+        $primaryKeyName = $obj->getKeyName();
+        $this->columns = $columns = CommonClass::getColumns($table);
+        
+        $path = base_path() . "/.wiki/{$url_path}";
+        
+        $this->makeDirectory($path.'/a.wiki');
+        
+        $this->files->put($path . "/create.wiki", $this->buildCreateClass('create'));
+        $this->files->put($path . '/update.wiki', $this->buildUpdateClass('update'));
+        $this->files->put($path . '/destroy.wiki', $this->buildDestroyClass('destroy'));
+        $this->files->put($path . '/index.wiki', $this->buildIndexClass('index'));
+        $this->files->put($path . '/show.wiki', $this->buildShowClass('show'));
+    }
+    
+    protected function buildCreateClass($name)
+    {
+        $replace['DummyCreateWikiDate'] = date('Y-m-d');
+        $replace['DummyHostPath'] = $this->url_path_create;
+        
+        $str = '';
+        foreach($this->columns as $column){
+            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
+            $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
+        }
+        $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
+        $row = $this->getRowData();
+        $str2 = '';
+        foreach ($row as $key=>$value){
+            $str2 .= "
+        \"{$key}\": \"{$value}\", //{$comments[$key]->COLUMN_COMMENT}";
+        }
+        $replace['DummyFormData'] = $str;
+        $replace['DummyRowDetail'] = $str2;
+        
+        $view = $this->files->get($this->getWikiView($name));
+        
+        return str_replace(
+                array_keys($replace), array_values($replace), $view
+        );
+    }
+    protected function buildUpdateClass($name)
+    {
+        $replace['DummyCreateWikiDate'] = date('Y-m-d');
+        $replace['DummyHostPath'] = $this->url_path_update;
+        
+        $str = '';
+        foreach($this->columns as $column){
+            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
+            $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
+        }
+        $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
+        $row = $this->getRowData();
+        $str2 = '';
+        foreach ($row as $key=>$value){
+            $str2 .= "
+        \"{$key}\": \"{$value}\", //{$comments[$key]->COLUMN_COMMENT}";
+        }
+        $replace['DummyFormData'] = $str;
+        $replace['DummyRowDetail'] = $str2;
+        
+        $view = $this->files->get($this->getWikiView($name));
+        
+        return str_replace(
+                array_keys($replace), array_values($replace), $view
+        );
+    }
+    protected function buildShowClass($name)
+    {
+        $replace['DummyCreateWikiDate'] = date('Y-m-d');
+        $replace['DummyHostPath'] = $this->url_path_show;
+        
+        $str = '';
+        foreach($this->columns as $column){
+            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
+            $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
+        }
+        $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
+        $replace['DummyFormData'] = $comments['id']->COLUMN_COMMENT;
+        $row = $this->getRowData();
+        $str2 = '';
+        foreach ($row as $key=>$value){
+            $str2 .= "
+        \"{$key}\": \"{$value}\", //{$comments[$key]->COLUMN_COMMENT}";
+        }
+        $replace['DummyRowDetail'] = $str2;
+        
+        $view = $this->files->get($this->getWikiView($name));
+        
+        return str_replace(
+                array_keys($replace), array_values($replace), $view
+        );
+    }
+    protected function buildIndexClass($name)
+    {
+        $replace['DummyCreateWikiDate'] = date('Y-m-d');
+        $replace['DummyHostPath'] = $this->url_path_index;
+        
+        $str = '';
+        foreach($this->columns as $column){
+            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
+            $IS_NULLABLE = '否';
+            $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
+        }
+        $replace['DummyFormData'] = $str;
+        
+        $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
+        $rows = $this->getRowsData();
+        $str2 = '';
+        foreach ($rows as $rk=>$row){
+            $str2 .= '
+            {';
+            foreach($row as $key=>$value){
+            $str2 .= "
+                \"{$key}\": \"{$value}\",";
+                if($rk ==0){
+                    $str2 .= " //{$comments[$key]->COLUMN_COMMENT}";
+                }
+            }
+            
+            $str2 .= '
+            },';            
+        }
+
+        $replace['DummyRowDetail'] = $str2;
+        
+        $view = $this->files->get($this->getWikiView($name));
+        
+        return str_replace(
+                array_keys($replace), array_values($replace), $view
+        );
+    }
+    protected function buildDestroyClass($name)
+    {
+        $replace['DummyCreateWikiDate'] = date('Y-m-d');
+        $replace['DummyHostPath'] = $this->url_path_destroy;
+        
+        $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
+        $replace['DummyFormData'] = $comments['id']->COLUMN_COMMENT;
+        
+        $view = $this->files->get($this->getWikiView($name));
+        
+        return str_replace(
+                array_keys($replace), array_values($replace), $view
+        );
+    }
+
     /**
      * Build the replacements for a parent controller.
      *
@@ -162,13 +314,8 @@ class CurdMakeCommand extends GeneratorCommand
         $modelClass = $this->parseModel($this->option('model'));
 
         if (!class_exists($modelClass)) {
-            if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
-                $this->call('make:model-rule', ['name' => $modelClass,'--cut' => true]);
-                $path = CommonClass::getModelPath($modelClass);
-                require_once base_path(). '/app/'.$path.'.php';
-            }else{
-                exit(0);
-            }
+            $this->error('model does not exist.');
+            exit(0);
         }
         return array_merge($replace, [
             'DummyFullModelClass' => $modelClass,
@@ -284,6 +431,11 @@ class CurdMakeCommand extends GeneratorCommand
             'DummyUniqueRule' => $uniqueRule,
             'DummyUniqueUpdateRule' => $uniqueRuleUpdate,
         ]);
+    }
+    
+    protected function getWikiView($name)
+    {
+        return __DIR__."/wiki/{$name}.wiki";
     }
     
     protected function getRowData()
