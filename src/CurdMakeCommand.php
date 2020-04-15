@@ -229,10 +229,27 @@ class CurdMakeCommand extends GeneratorCommand
         // Search Condition
         $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
         foreach ($columns as $key=>$column) {
-            $searchCondition .= '
+            $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            if($column->COLUMN_NAME == 'created_at'){
+                $searchCondition .= '
+        if ($request->created_at_begin && $request->created_at_end) {
+            $model->whereBetween(\''.$column->COLUMN_NAME.'\', [$request->created_at_begin, $request->created_at_end]);
+        }';
+            }elseif($column->COLUMN_NAME == 'updated_at'){
+                
+            }else{
+                if($DATA_TYPE == 'string'){
+                    $searchCondition .= '
+        if ($request->'.$column->COLUMN_NAME.') {
+            $model->where(\''.$column->COLUMN_NAME.'\', \'like\', "%{$request->'.$column->COLUMN_NAME.'}%");
+        }';                    
+                }else{
+                    $searchCondition .= '
         if ($request->'.$column->COLUMN_NAME.') {
             $model->where(\''.$column->COLUMN_NAME.'\', $request->'.$column->COLUMN_NAME.');
         }';
+                }
+            }
             //单字段唯一索引
             if($column->COLUMN_KEY === 'UNI'){
                 $uniqueRule .= "

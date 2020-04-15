@@ -106,8 +106,11 @@ class CommonClass
     {
         $name_space = trim(implode('\\', array_slice(explode('\\', $name), 0, -1)), '\\');
         $class = str_replace($name_space.'\\', '', $name);
+//        return str_replace(
+//            '\\', '', Str::snake(Str::plural($class))
+//        );
         return str_replace(
-            '\\', '', Str::snake(Str::plural($class))
+            '\\', '', Str::snake(($class))
         );
         
     }

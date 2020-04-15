@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use InvalidArgumentException;
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
+use Illuminate\Support\Facades\DB;
 
 class WikiMakeCommand extends GeneratorCommand
 {
@@ -138,11 +139,71 @@ class WikiMakeCommand extends GeneratorCommand
         
         $this->makeDirectory($path.'/a.wiki');
         
-        $this->files->put($path . "/create.wiki", $this->buildCreateClass('create'));
-        $this->files->put($path . '/update.wiki', $this->buildUpdateClass('update'));
-        $this->files->put($path . '/destroy.wiki', $this->buildDestroyClass('destroy'));
-        $this->files->put($path . '/index.wiki', $this->buildIndexClass('index'));
-        $this->files->put($path . '/show.wiki', $this->buildShowClass('show'));
+        $md_create = $this->buildCreateClass('create');
+        $md_update = $this->buildUpdateClass('update');
+        $md_destroy = $this->buildDestroyClass('destroy');
+        $md_index = $this->buildIndexClass('index');
+        $md_show = $this->buildShowClass('show');
+        
+        $this->files->put($path . "/create.wiki", $md_create);
+        $this->files->put($path . '/update.wiki', $md_update);
+        $this->files->put($path . '/destroy.wiki', $md_destroy);
+        $this->files->put($path . '/index.wiki', $md_index);
+        $this->files->put($path . '/show.wiki', $md_show);
+        
+        if(!$this->option('doc')){
+            return true;
+        }
+        if(!$this->option('book')){
+            $book_id = 2;
+        }else{
+            $book_id = (int) $this->option('book');
+        }
+        $document_name = $this->option('doc');
+        $base = [
+            'book_id' => $book_id,
+            'parent_id' => 0,
+            'release' => '',
+            'content' => '',
+            'create_time' => date('Y-m-d H:i:s'),
+            'member_id' => 1,
+            'modify_time' => date('Y-m-d H:i:s'),
+            'version' => time(),
+        ];
+        $data = array_merge($base, [
+            'identify' => $this->getIdentify(),
+            'document_name' => $document_name,
+        ]);
+        $parent_id  = DB::connection('mysqlMindoc')->table('documents')->insertGetId($data);
+        $base = array_merge($base, [
+            'parent_id' => $parent_id,
+        ]);
+        $datas[] = array_merge($base, [
+            'identify' => $this->getIdentify(),
+            'document_name' => '添加',
+            'markdown' => $md_create,
+        ]);
+        $datas[] = array_merge($base, [
+            'identify' => $this->getIdentify(),
+            'document_name' => '更新',
+            'markdown' => $md_update,
+        ]);
+        $datas[] = array_merge($base, [
+            'identify' => $this->getIdentify(),
+            'document_name' => '删除',
+            'markdown' => $md_destroy,
+        ]);
+        $datas[] = array_merge($base, [
+            'identify' => $this->getIdentify(),
+            'document_name' => '列表',
+            'markdown' => $md_index,
+        ]);
+        $datas[] = array_merge($base, [
+            'identify' => $this->getIdentify(),
+            'document_name' => '详情',
+            'markdown' => $md_show,
+        ]);
+        DB::connection('mysqlMindoc')->table('documents')->insert($datas);
     }
     
     protected function buildCreateClass($name)
@@ -156,7 +217,7 @@ class WikiMakeCommand extends GeneratorCommand
                 continue;
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
-            $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
+            $IS_NULLABLE = $this->getIS_NULLABLE($column->COLUMN_NAME) ? '是' : '否';
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
         }
@@ -195,7 +256,7 @@ class WikiMakeCommand extends GeneratorCommand
                 continue;
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
-            $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
+            $IS_NULLABLE = $this->getIS_NULLABLE($column->COLUMN_NAME) ? '是' : '否';
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
         }
@@ -228,13 +289,6 @@ class WikiMakeCommand extends GeneratorCommand
         $replace['DummyCreateWikiDate'] = date('Y-m-d');
         $replace['DummyHostPath'] = $this->url_path_show;
         
-        $str = '';
-        foreach($this->columns as $column){
-            $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
-            $IS_NULLABLE = $column->IS_NULLABLE === 'NO' ? '是' : '否';
-            $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
-            $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
-        }
         $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
         $replace['DummyFormData'] = $comments['id']->COLUMN_COMMENT;
         $row = $this->getRowData();
@@ -269,6 +323,17 @@ class WikiMakeCommand extends GeneratorCommand
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
             $IS_NULLABLE = '否';
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
+            if($column->COLUMN_NAME == 'id'){
+                continue;
+            }
+            if($column->COLUMN_NAME == 'updated_at'){
+                continue;
+            }
+            if($column->COLUMN_NAME == 'created_at'){
+                $str .= "\n|{$column->COLUMN_NAME}_begin |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT} 开始日期   |";
+                $str .= "\n|{$column->COLUMN_NAME}_end |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT} 结束日期   |";
+                continue;
+            }
             $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
         }
         $replace['DummyFormData'] = $str;
@@ -398,6 +463,8 @@ class WikiMakeCommand extends GeneratorCommand
             ['resource', 'r', InputOption::VALUE_NONE, 'Generate a resource controller class.'],
             ['parent', 'p', InputOption::VALUE_OPTIONAL, 'Generate a nested resource controller class.'],
             ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists.'],
+            ['doc', 'd', InputOption::VALUE_OPTIONAL, 'Generate mindoc wiki.'],
+            ['book', 'b', InputOption::VALUE_OPTIONAL, 'Select a book of mindoc wiki.'],
         ];
     }
 
@@ -490,5 +557,21 @@ class WikiMakeCommand extends GeneratorCommand
         $modelClass = $this->parseModel($this->option('model'));
         $row = $modelClass::limit(2)->get();
         return $row->toArray();
+    }
+    
+    protected function getIdentify()
+    {
+        return 'mindoc-' . date('ymdH') . str_random(16);
+    }
+    
+    protected function getIS_NULLABLE($field)
+    {
+        $modelClass = $this->parseModel($this->option('model'));
+        $obj = new $modelClass();
+        $rules = $obj->rules()[$field] ?? [];
+        if(collect($rules)->search('required') !== false){
+            return true;
+        }
+        return false;
     }
 }
