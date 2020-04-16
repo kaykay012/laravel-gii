@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use DummyRootNamespaceHttp\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
 use DummyFullModelClass;
 
 class DummyClass extends Controller
@@ -56,7 +57,7 @@ class DummyClass extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request, DummyModelClass $DummyModelVariable)
-    {
+    {DummyCreateDefaultValue
         $rules = array_merge_recursive($DummyModelVariable->rules(), [DummyUniqueRule
         ]);
         $messages = $DummyModelVariable->messages();

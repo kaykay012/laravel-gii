@@ -227,15 +227,17 @@ class CurdMakeCommand extends GeneratorCommand
         $this->columns = $columns = CommonClass::getColumns($table);
         
         // Search Condition
-        $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
+        $createDefaultValue = $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
         foreach ($columns as $key=>$column) {
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             if($column->COLUMN_NAME == 'created_at'){
                 $searchCondition .= '
         if ($request->created_at_begin && $request->created_at_end) {
-            $model->whereBetween(\''.$column->COLUMN_NAME.'\', [$request->created_at_begin, $request->created_at_end]);
+            $model->whereBetween(\''.$column->COLUMN_NAME.'\', [$request->created_at_begin, Carbon::parse($request->created_at_end)->endOfDay()]);
         }';
             }elseif($column->COLUMN_NAME == 'updated_at'){
+                
+            }elseif($column->COLUMN_NAME == 'deleted_at'){
                 
             }else{
                 if($DATA_TYPE == 'string'){
@@ -250,6 +252,16 @@ class CurdMakeCommand extends GeneratorCommand
         }';
                 }
             }
+            
+            //$createDefaultValue
+            if($column->COLUMN_DEFAULT !== null && $column->COLUMN_DEFAULT !== ''){
+                $createDefaultValue .= '
+        //'.$column->COLUMN_COMMENT.'
+        if($request->'.$column->COLUMN_NAME.' === \'\'){
+            $request->merge([\''.$column->COLUMN_NAME.'\'=>\''.$column->COLUMN_DEFAULT.'\']);
+        }';
+            }
+            
             //单字段唯一索引
             if($column->COLUMN_KEY === 'UNI'){
                 $uniqueRule .= "
@@ -304,6 +316,7 @@ class CurdMakeCommand extends GeneratorCommand
             'DummyPrimaryKeyName' => $primaryKeyName,
             'DummyUniqueRule' => $uniqueRule,
             'DummyUniqueUpdateRule' => $uniqueRuleUpdate,
+            'DummyCreateDefaultValue' => $createDefaultValue,
         ]);
     }
     

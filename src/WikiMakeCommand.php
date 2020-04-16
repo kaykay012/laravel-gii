@@ -39,8 +39,8 @@ class WikiMakeCommand extends GeneratorCommand
     private $url_path_update;
     private $url_path_destroy;
     
-    private $expect_files_create = ['id', 'created_at', 'updated_at'];
-    private $expect_files_update = ['created_at', 'updated_at'];
+    private $expect_files_create = ['id', 'created_at', 'updated_at', 'deleted_at'];
+    private $expect_files_update = ['created_at', 'updated_at', 'deleted_at'];
 
     public function handle()
     {
@@ -224,7 +224,9 @@ class WikiMakeCommand extends GeneratorCommand
         $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
         $row = $this->getRowData();
         $str2 = '';
+        $n = 0;
         foreach ($row as $key=>$value){
+            $n++;
             if(is_array($value)){
                 $value = json_encode($value);
             }
@@ -233,8 +235,11 @@ class WikiMakeCommand extends GeneratorCommand
             }else{
                 $value = "\"{$value}\"";
             }
+            if($n < count($row)){
+                $value .= ',';
+            }
             $str2 .= "
-        \"{$key}\": {$value}, //{$comments[$key]->COLUMN_COMMENT}";
+        \"{$key}\": {$value} //{$comments[$key]->COLUMN_COMMENT}";
         }
         $replace['DummyFormData'] = $str;
         $replace['DummyRowDetail'] = $str2;
@@ -256,14 +261,16 @@ class WikiMakeCommand extends GeneratorCommand
                 continue;
             }
             $COLUMN_COMMENT = $column->COLUMN_COMMENT ?: strtoupper($column->COLUMN_NAME);
-            $IS_NULLABLE = $this->getIS_NULLABLE($column->COLUMN_NAME) ? '是' : '否';
+            $IS_NULLABLE = $this->getIS_NULLABLE($column->COLUMN_NAME, $column->IS_NULLABLE) ? '是' : '否';
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
             $str .= "\n|{$column->COLUMN_NAME} |{$IS_NULLABLE}  |{$DATA_TYPE} |{$COLUMN_COMMENT}   |";
         }
         $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
         $row = $this->getRowData();
         $str2 = '';
+        $n = 0;
         foreach ($row as $key=>$value){
+            $n++;
             if(is_array($value)){
                 $value = json_encode($value);
             }
@@ -272,8 +279,11 @@ class WikiMakeCommand extends GeneratorCommand
             }else{
                 $value = "\"{$value}\"";
             }
+            if($n < count($row)){
+                $value .= ',';
+            }
             $str2 .= "
-        \"{$key}\": {$value}, //{$comments[$key]->COLUMN_COMMENT}";
+        \"{$key}\": {$value} //{$comments[$key]->COLUMN_COMMENT}";
         }
         $replace['DummyFormData'] = $str;
         $replace['DummyRowDetail'] = $str2;
@@ -293,7 +303,9 @@ class WikiMakeCommand extends GeneratorCommand
         $replace['DummyFormData'] = $comments['id']->COLUMN_COMMENT;
         $row = $this->getRowData();
         $str2 = '';
+        $n = 0;
         foreach ($row as $key=>$value){
+            $n++;
             if(is_array($value)){
                 $value = json_encode($value);
             }
@@ -302,8 +314,11 @@ class WikiMakeCommand extends GeneratorCommand
             }else{
                 $value = "\"{$value}\"";
             }
+            if($n < count($row)){
+                $value .= ',';
+            }
             $str2 .= "
-        \"{$key}\": {$value}, //{$comments[$key]->COLUMN_COMMENT}";
+        \"{$key}\": {$value} //{$comments[$key]->COLUMN_COMMENT}";
         }
         $replace['DummyRowDetail'] = $str2;
         
@@ -341,10 +356,14 @@ class WikiMakeCommand extends GeneratorCommand
         $comments = collect($this->columns)->keyBy('COLUMN_NAME')->all();
         $rows = $this->getRowsData();
         $str2 = '';
+        $m = 0;
         foreach ($rows as $rk=>$row){
+            $m++;
+            $n = 0;
             $str2 .= '
             {';
             foreach($row as $key=>$value){
+                $n++;
                 if(is_array($value)){
                     $value = json_encode($value);
                 }
@@ -353,15 +372,21 @@ class WikiMakeCommand extends GeneratorCommand
                 }else{
                     $value = "\"{$value}\"";
                 }
+                if($n < count($row)){
+                    $value .= ',';
+                }
             $str2 .= "
-                \"{$key}\": {$value},";
+                \"{$key}\": {$value}";
                 if($rk ==0){
                     $str2 .= " //{$comments[$key]->COLUMN_COMMENT}";
                 }
             }
             
             $str2 .= '
-            },';            
+            }';
+            if($m < count($rows)){
+                $str2 .= ',';
+            }
         }
 
         $replace['DummyRowDetail'] = $str2;
@@ -564,11 +589,14 @@ class WikiMakeCommand extends GeneratorCommand
         return 'mindoc-' . date('ymdH') . str_random(16);
     }
     
-    protected function getIS_NULLABLE($field)
+    protected function getIS_NULLABLE($field, $IS_NULLABLE = 100)
     {
         $modelClass = $this->parseModel($this->option('model'));
         $obj = new $modelClass();
         $rules = $obj->rules()[$field] ?? [];
+        if(empty($rules) && $IS_NULLABLE !== 100){
+            return $IS_NULLABLE ? true : false;
+        }
         if(collect($rules)->search('required') !== false){
             return true;
         }
