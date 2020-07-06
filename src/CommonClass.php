@@ -18,6 +18,7 @@ use Illuminate\Support\Str;
  */
 class CommonClass
 {
+
     public static function getColumns(string $table)
     {
         $prefix = DB::getConfig('prefix');
@@ -25,7 +26,7 @@ class CommonClass
         $columns = DB::select("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'");
         return $columns;
     }
-    
+
     /**
      * 获取model相对路径
      * @param type $modelClass
@@ -35,7 +36,7 @@ class CommonClass
     {
         return str_replace('App\\', '', $modelClass);
     }
-    
+
     /**
      * 获取表字段的索引名称
      * @param string $table
@@ -49,7 +50,7 @@ class CommonClass
         $columns = DB::select("SELECT * FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = '{$db}' AND `TABLE_NAME` = '{$prefix}{$table}' AND `COLUMN_NAME` = '$column_name';");
         return $columns[0]->CONSTRAINT_NAME ?? '';
     }
-    
+
     /**
      * 根据索引名称获取`相同索引名称`字段
      * @param string $table
@@ -63,7 +64,7 @@ class CommonClass
         $columns = DB::select("SELECT * FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = '{$db}' AND `TABLE_NAME` = '{$prefix}{$table}' AND `CONSTRAINT_NAME` = '$constraint_name';");
         return $columns;
     }
-    
+
     /**
      * api接口的 url path
      * @param string $name
@@ -74,13 +75,13 @@ class CommonClass
         $name = str_replace('App\\Http\\Controllers\\', '', $name);
         $name = str_replace('Controller', '', $name);
         $arr = explode('\\', $name);
-        foreach($arr as $k=>$r){
+        foreach ($arr as $k => $r) {
             $arr[$k] = kebab_case($r);
         }
         $path_name = join('/', $arr);
         return $path_name;
     }
-    
+
     /**
      * Vue的驼峰命名
      * @param string $name
@@ -89,14 +90,14 @@ class CommonClass
     public static function getVueStudlyCase(string $name)
     {
         $arr = explode('/', $name);
-        foreach($arr as $k=>$val){
+        foreach ($arr as $k => $val) {
             $arr[$k] = snake_case($val);
         }
         $underline_name = join('_', $arr);
         $pathName = studly_case($underline_name);
         return $pathName;
     }
-    
+
     /**
      * Get the table associated with the model.
      *
@@ -105,16 +106,15 @@ class CommonClass
     public static function getTable($name)
     {
         $name_space = trim(implode('\\', array_slice(explode('\\', $name), 0, -1)), '\\');
-        $class = str_replace($name_space.'\\', '', $name);
+        $class = str_replace($name_space . '\\', '', $name);
 //        return str_replace(
 //            '\\', '', Str::snake(Str::plural($class))
 //        );
         return str_replace(
-            '\\', '', Str::snake(($class))
+                '\\', '', Str::snake(($class))
         );
-        
     }
-    
+
     /**
      * 获取表主键名
      * @param string $table
@@ -125,10 +125,10 @@ class CommonClass
         $prefix = DB::getConfig('prefix');
         $db = config('database.connections.mysql.database');
         $row = DB::select("SELECT column_name FROM INFORMATION_SCHEMA.`KEY_COLUMN_USAGE` WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}' AND constraint_name='PRIMARY'");
-        
+
         return $row[0]->column_name ?? null;
     }
-    
+
     public static function existsTable(string $table)
     {
         $prefix = DB::getConfig('prefix');
@@ -136,7 +136,7 @@ class CommonClass
         $row = DB::select("SELECT table_name FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}'");
         return $row[0]->table_name ?? null;
     }
-    
+
     /**
      * 获取 laravel model 验证规则
      * @param string $type 表字段类型
@@ -163,33 +163,38 @@ class CommonClass
             return 'date_format:H:i:s';
         } elseif (in_array($data_type, $data['year'])) {
             return 'date_format:Y';
-        }else {
+        } else {
             return 'string';
         }
     }
-    
+
     /**
      * 返回字符串中给定值之前的所有内容
      * @param type $subject
      * @param type $search
      * @return type
      */
-    public static function strBefore($subject, $search=null)
+    public static function strBefore($subject, $search = null)
     {
         $pun = [' ', ':', '：', '，', ','];
-        if($search === null){
+        if ($search === null) {
             $datas = $pun;
-        }else{
-            if(is_string($search)){
+        } else {
+            if (is_string($search)) {
                 $datas[] = $search;
-            }else{
+            } else {
                 $datas = $search;
             }
             $datas = array_merge_recursive($datas, $pun);
         }
-        foreach ($datas as $data){
-            $subject = str_before($subject, $data);
+        foreach ($datas as $data) {
+            if (!function_exists('str_before')) {
+                $subject = Str::before($subject, $data);
+            } else {
+                $subject = str_before($subject, $data);
+            }
         }
         return $subject;
     }
+
 }
