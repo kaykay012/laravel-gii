@@ -76,7 +76,7 @@ class CommonClass
         $name = str_replace('Controller', '', $name);
         $arr = explode('\\', $name);
         foreach ($arr as $k => $r) {
-            $arr[$k] = kebab_case($r);
+            $arr[$k] = Str::kebab($r);
         }
         $path_name = join('/', $arr);
         return $path_name;
@@ -94,7 +94,7 @@ class CommonClass
             $arr[$k] = snake_case($val);
         }
         $underline_name = join('_', $arr);
-        $pathName = studly_case($underline_name);
+        $pathName = Str::studly($underline_name);
         return $pathName;
     }
 
