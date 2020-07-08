@@ -22,5 +22,5 @@ php artisan make:curd CurdController --model=App\\Models\\User
 
 创建 api Wiki 文档.
 ```
-php artisan make:wiki Admin/CurdController --model=App\\Models\\User --force --doc=分类管理 --book=2
+php artisan make:wiki Admin/CurdController --model=App\\Models\\User --force --doc=article --book=2
 ```

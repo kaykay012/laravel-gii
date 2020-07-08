@@ -586,7 +586,7 @@ class WikiMakeCommand extends GeneratorCommand
     
     protected function getIdentify()
     {
-        return 'mindoc-' . date('ymdH') . str_random(16);
+        return 'mindoc-' . date('ymdH') . Str::random(16);
     }
     
     protected function getIS_NULLABLE($field, $IS_NULLABLE = 100)
