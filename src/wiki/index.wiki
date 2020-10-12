@@ -33,19 +33,12 @@
     "code": 200,
     "message": "common.Success",
     "data": {
-        "current_page": 1, //当前页
         "data": [DummyRowDetail
         ],
-        "first_page_url": "",
-        "from": 1,
-        "last_page": 1, //末页
-        "last_page_url": "",
-        "next_page_url": null,
-        "path": "",
+        "current_page": 1, //当前页
+        "last_page": 1, //末页/总页数
         "per_page": 15, //每页条数
-        "prev_page_url": null,
-        "to": 5,
-        "total": 5 //共多少条数据
+        "total": 5 //数据总条数
     }
 }
 ```
