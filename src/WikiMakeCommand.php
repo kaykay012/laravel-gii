@@ -575,6 +575,12 @@ class WikiMakeCommand extends GeneratorCommand
     {
         $modelClass = $this->parseModel($this->option('model'));
         $row = $modelClass::first();
+        if(!$row){
+            $obj = new $modelClass();
+            $table = $obj->getTable();
+            $this->error("[{$table}]表中至少保留一条数据");
+            exit;
+        }
         return $row->toArray();
     }
     protected function getRowsData()
