@@ -57,7 +57,7 @@ class DummyClass extends Controller
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request, DummyModelClass $DummyModelVariable)
-    {DummyCreateDefaultValue
+    {
         $rules = array_merge_recursive($DummyModelVariable->rules(), [DummyUniqueRule
         ]);
         $messages = $DummyModelVariable->messages();
