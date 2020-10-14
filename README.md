@@ -24,7 +24,7 @@ php artisan make:curd CurdController --model=App\\Models\\User
 
     --doc MinDoc的documents表document_name字段名称 (使用此属性表中至少保留一条数据)
 
-    --book MinDoc的md_book表主键id (使用此属性表中至少保留一条数据)
+    --book MinDoc的md_book表主键id (使用此属性表中至少保留一条数据).
 ```
 php artisan make:wiki Admin/CurdController --model=App\\Models\\User --force --doc=article --book=2
 ```
