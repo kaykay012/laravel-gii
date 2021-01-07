@@ -77,7 +77,12 @@ class DummyClass extends Controller
         $DummyModelVariable->fill($request->all());
         if($DummyModelVariable->save())
         {
-            return ['code' => 200, 'message' => __('admin.SuccessCreated'), 'data' => $DummyModelVariable];
+            return [
+                'code' => 200, 
+                'message' => __('admin.SuccessCreated'), 
+                'data' => $DummyModelVariable, 
+                'log' => sprintf('[%s][%s][id:%s]', __('admin.SuccessCreated'), $DummyModelVariable->tableComments, $DummyModelVariable->id)
+            ];
         }else{
             return ['code' => 5001, 'message' => __('admin.Server internal error')];
         }
@@ -110,7 +115,12 @@ class DummyClass extends Controller
         $model->fill($request->all());
         if($model->save())
         {
-            return ['code' => 200, 'message' => __('admin.SuccessUpdated'), 'data' => $model];
+            return [
+                'code' => 200, 
+                'message' => __('admin.SuccessUpdated'), 
+                'data' => $model, 
+                'log' => sprintf('[%s][%s][id:%s]', __('admin.SuccessUpdated'), $DummyModelVariable->tableComments, $model->id)
+            ];
         }else{
             return ['code' => 5001, 'message' => __('admin.Server internal error')];
         }
@@ -122,7 +132,7 @@ class DummyClass extends Controller
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request, DummyModelClass $DummyModelVariable)
     {
         $validator = Validator::make($request->all(), [
             'id' => ['required',],
@@ -130,9 +140,14 @@ class DummyClass extends Controller
         if ($validator->fails()) {
             return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $model = DummyModelClass::whereIn('DummyPrimaryKeyName', is_array($request->id) ? $request->id : [$request->id]);
+        $ids = is_array($request->id) ? $request->id : [$request->id];
+        $model = $DummyModelVariable::whereIn('DummyPrimaryKeyName', $ids);
         if($model->delete()){
-            return ['code' => 200, 'message' => __('admin.SuccessDestroyed')];
+            return [
+                'code' => 200, 
+                'message' => __('admin.SuccessDestroyed'), 
+                'log' => sprintf('[%s][%s]『id:%s』', __('admin.SuccessDestroyed'), $DummyModelVariable->tableComments, json_encode($ids))
+            ];
         }else{
             return ['code' => 5001, 'message' => __('admin.Server internal error')];
         }

@@ -26,6 +26,13 @@ class CommonClass
         $columns = DB::select("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'");
         return $columns;
     }
+    public static function getTableInfo(string $table)
+    {
+        $prefix = DB::getConfig('prefix');
+        $db = config('database.connections.mysql.database');
+        $columns = DB::select("select table_schema, table_name, table_comment from information_schema.tables where table_schema = '{$db}' and table_name = '{$prefix}{$table}';");
+        return $columns[0]->table_comment ?: $columns[0]->table_name;
+    }
 
     /**
      * 获取model相对路径
