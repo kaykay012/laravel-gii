@@ -30,7 +30,6 @@ class CurdMakeCommand extends GeneratorCommand
      * @var string
      */
     protected $type = 'Controller';
-    
     private $columns;
     private $url_path_index;
     private $url_path_show;
@@ -40,40 +39,54 @@ class CurdMakeCommand extends GeneratorCommand
 
     public function handle()
     {
-        if (parent::handle() === false && ! $this->option('force')) {
+        if (parent::handle() === false && !$this->option('force'))
+        {
             return;
         }
         $input_name = $this->getNameInput();
         $name = $this->qualifyClass($input_name);
         $url_path = CommonClass::getRoutePathName($name);
         $controller_name = str_replace('/', '\\', $input_name);
-        
+
         $this->url_path_index = "{$url_path}/index";
         $this->url_path_show = "{$url_path}/show";
         $this->url_path_create = "{$url_path}/create";
         $this->url_path_update = "{$url_path}/update";
         $this->url_path_destroy = "{$url_path}/destroy";
-        
+
         $this->info('');
-        $this->info("Route::get('{$this->url_path_index}', '{$controller_name}@index');");
-        $this->info("Route::get('{$this->url_path_show}', '{$controller_name}@show');");
-        $this->info("Route::post('{$this->url_path_create}', '{$controller_name}@create');");
-        $this->info("Route::post('{$this->url_path_update}', '{$controller_name}@update');");
-        $this->info("Route::post('{$this->url_path_destroy}', '{$controller_name}@destroy');");
+        $this->info("Route::any('{$this->url_path_index}', '{$controller_name}@index');");
+        $this->info("Route::any('{$this->url_path_show}', '{$controller_name}@show');");
+        $this->info("Route::any('{$this->url_path_create}', '{$controller_name}@create');");
+        $this->info("Route::any('{$this->url_path_update}', '{$controller_name}@update');");
+        $this->info("Route::any('{$this->url_path_destroy}', '{$controller_name}@destroy');");
         $this->info("\n");
-        
+
         //postman 参数
         $str = '';
         $str_json = [];
-        foreach ($this->columns as $key=>$column) {
+        foreach ($this->columns as $key => $column)
+        {
             $str .= "{$column->COLUMN_NAME}:\n";
             $str_json[$column->COLUMN_NAME] = "";
         }
-        
+
         $this->info($str);
         $this->info(json_encode($str_json));
+        
+        
+        if ($this->option('blade'))
+        {
+            $modelClass = $this->parseModel($this->option('model'));
+            $this->info("\n");
+            $params = ['name' => $url_path, '--table' => (new $modelClass())->getTable()];
+            if($this->option('force')){
+                $params = array_merge($params, ['--force'=>'1']);
+            }
+            $this->call('make:view-blade', $params);
+        }
     }
-    
+
     /**
      * Get the stub file for the generator.
      *
@@ -81,16 +94,25 @@ class CurdMakeCommand extends GeneratorCommand
      */
     protected function getStub()
     {
-        if ($this->option('parent')) {
+        if ($this->option('parent'))
+        {
             return __DIR__ . '/stubs/controller.nested.stub';
-        } elseif ($this->option('model')) {
-            return __DIR__ . '/stubs/controller.model.stub';
-        } elseif ($this->option('resource')) {
+        } elseif ($this->option('model'))
+        {
+            if ($this->option('blade'))
+            {
+                return __DIR__ . '/stubs/controller.model.blade.stub';
+            } else
+            {
+                return __DIR__ . '/stubs/controller.model.stub';
+            }
+        } elseif ($this->option('resource'))
+        {
             return __DIR__ . '/stubs/controller.stub';
         }
 
         return __DIR__ . '/stubs/controller.plain.stub';
-    }   
+    }
 
     /**
      * Get the default namespace for the class.
@@ -114,16 +136,20 @@ class CurdMakeCommand extends GeneratorCommand
     protected function buildClass($name)
     {
         $controllerNamespace = $this->getNamespace($name);
-
+        $class = str_replace($controllerNamespace.'\\', '', $name);
+        
         $replace = [];
 
-        if ($this->option('parent')) {
+        if ($this->option('parent'))
+        {
             $replace = $this->buildParentReplacements();
         }
 
-        if ($this->option('model')) {
+        if ($this->option('model'))
+        {
             $replace = $this->buildModelReplacements($replace);
             $replace = $this->buildCurdReplacements($replace);
+            $replace['DummyViewBladeFolder'] = lcfirst(str_replace('Controller', '', $class));
         }
 
         $replace["use {$controllerNamespace}\Controller;\n"] = '';
@@ -132,7 +158,7 @@ class CurdMakeCommand extends GeneratorCommand
                 array_keys($replace), array_values($replace), parent::buildClass($name)
         );
     }
-    
+
     /**
      * Build the replacements for a parent controller.
      *
@@ -142,8 +168,10 @@ class CurdMakeCommand extends GeneratorCommand
     {
         $parentModelClass = $this->parseModel($this->option('parent'));
 
-        if (!class_exists($parentModelClass)) {
-            if ($this->confirm("A {$parentModelClass} model does not exist. Do you want to generate it?", true)) {
+        if (!class_exists($parentModelClass))
+        {
+            if ($this->confirm("A {$parentModelClass} model does not exist. Do you want to generate it?", true))
+            {
                 $this->call('make:model', ['name' => $parentModelClass]);
             }
         }
@@ -165,12 +193,15 @@ class CurdMakeCommand extends GeneratorCommand
     {
         $modelClass = $this->parseModel($this->option('model'));
 
-        if (!class_exists($modelClass)) {
-            if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
-                $this->call('make:model-rule', ['name' => $modelClass,'--cut' => true]);
+        if (!class_exists($modelClass))
+        {
+            if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true))
+            {
+                $this->call('make:model-rule', ['name' => $modelClass, '--cut' => true]);
                 $path = CommonClass::getModelPath($modelClass);
-                require_once base_path(). '/app/'.$path.'.php';
-            }else{
+                require_once base_path() . '/app/' . $path . '.php';
+            } else
+            {
                 exit(0);
             }
         }
@@ -189,13 +220,15 @@ class CurdMakeCommand extends GeneratorCommand
      */
     protected function parseModel($model)
     {
-        if (preg_match('([^A-Za-z0-9_/\\\\])', $model)) {
+        if (preg_match('([^A-Za-z0-9_/\\\\])', $model))
+        {
             throw new InvalidArgumentException('Model name contains invalid characters.');
         }
 
         $model = trim(str_replace('/', '\\', $model), '\\');
 
-        if (!Str::startsWith($model, $rootNamespace = $this->laravel->getNamespace())) {
+        if (!Str::startsWith($model, $rootNamespace = $this->laravel->getNamespace()))
+        {
             $model = $rootNamespace . $model;
         }
 
@@ -214,102 +247,115 @@ class CurdMakeCommand extends GeneratorCommand
             ['resource', 'r', InputOption::VALUE_NONE, 'Generate a resource controller class.'],
             ['parent', 'p', InputOption::VALUE_OPTIONAL, 'Generate a nested resource controller class.'],
             ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists.'],
+            ['blade', null, InputOption::VALUE_NONE, 'Create controller for view blade'],
         ];
     }
 
     protected function buildCurdReplacements(array $replace)
     {
         $modelClass = $this->parseModel($this->option('model'));
-        
+
         $obj = new $modelClass();
         $table = $obj->getTable();
         $primaryKeyName = $obj->getKeyName();
         $this->columns = $columns = CommonClass::getColumns($table);
-        
+
         // Search Condition
         $createDefaultValue = $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
-        foreach ($columns as $key=>$column) {
+        foreach ($columns as $key => $column)
+        {
             $DATA_TYPE = CommonClass::getDataType($column->DATA_TYPE);
-            if($column->COLUMN_NAME == 'created_at'){
+            if ($column->COLUMN_NAME == 'created_at')
+            {
                 $searchCondition .= '
         if ($request->created_at_begin && $request->created_at_end) {
-            $model->whereBetween(\''.$column->COLUMN_NAME.'\', [$request->created_at_begin, Carbon::parse($request->created_at_end)->endOfDay()]);
+            $model->whereBetween(\'' . $column->COLUMN_NAME . '\', [$request->created_at_begin, Carbon::parse($request->created_at_end)->endOfDay()]);
         }';
-            }elseif($column->COLUMN_NAME == 'updated_at'){
+            } elseif ($column->COLUMN_NAME == 'updated_at')
+            {
                 
-            }elseif($column->COLUMN_NAME == 'deleted_at'){
+            } elseif ($column->COLUMN_NAME == 'deleted_at')
+            {
                 
-            }else{
-                if($DATA_TYPE == 'string'){
+            } else
+            {
+                if ($DATA_TYPE == 'string')
+                {
                     $searchCondition .= '
-        if ($request->'.$column->COLUMN_NAME.') {
-            $model->where(\''.$column->COLUMN_NAME.'\', \'like\', "%{$request->'.$column->COLUMN_NAME.'}%");
-        }';                    
-                }else{
+        if ($request->' . $column->COLUMN_NAME . ') {
+            $model->where(\'' . $column->COLUMN_NAME . '\', \'like\', "%{$request->' . $column->COLUMN_NAME . '}%");
+        }';
+                } else
+                {
                     $searchCondition .= '
-        if ($request->'.$column->COLUMN_NAME.') {
-            $model->where(\''.$column->COLUMN_NAME.'\', $request->'.$column->COLUMN_NAME.');
+        if ($request->' . $column->COLUMN_NAME . ') {
+            $model->where(\'' . $column->COLUMN_NAME . '\', $request->' . $column->COLUMN_NAME . ');
         }';
                 }
             }
-            
+
             //$createDefaultValue
-            if($column->COLUMN_DEFAULT !== null && $column->COLUMN_DEFAULT !== ''){
+            if ($column->COLUMN_DEFAULT !== null && $column->COLUMN_DEFAULT !== '')
+            {
                 $createDefaultValue .= '
-        //'.$column->COLUMN_COMMENT.'
-        if($request->'.$column->COLUMN_NAME.' === \'\'){
-            $request->merge([\''.$column->COLUMN_NAME.'\'=>\''.$column->COLUMN_DEFAULT.'\']);
+        //' . $column->COLUMN_COMMENT . '
+        if($request->' . $column->COLUMN_NAME . ' === \'\'){
+            $request->merge([\'' . $column->COLUMN_NAME . '\'=>\'' . $column->COLUMN_DEFAULT . '\']);
         }';
             }
-            
+
             //单字段唯一索引
-            if($column->COLUMN_KEY === 'UNI'){
+            if ($column->COLUMN_KEY === 'UNI')
+            {
                 $uniqueRule .= "
             '{$column->COLUMN_NAME}' => ['unique:{$table}'],";
-            
+
                 $uniqueRuleUpdate .= "
-            '".$column->COLUMN_NAME."' => [Rule::unique('".$table."')->ignore(".'$request->id'.")],";
+            '" . $column->COLUMN_NAME . "' => [Rule::unique('" . $table . "')->ignore(" . '$request->id' . ")],";
             }
             //多字段唯一索引
-            if($column->COLUMN_KEY === 'MUL'){
+            if ($column->COLUMN_KEY === 'MUL')
+            {
                 $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME);
                 $uniques = CommonClass::getIndexColumns($table, $constraint_name);
                 $fields = collect($uniques)->pluck('COLUMN_NAME');
-                
-                foreach ($fields as $field){
-                    
+
+                foreach ($fields as $field)
+                {
+
                     $uniqueRule .= "
-            '".$field."' => [Rule::unique('".$table."')";
-                    
+            '" . $field . "' => [Rule::unique('" . $table . "')";
+
                     $fields_except = $fields->reject(function ($value, $key) use($field) {
                         return $value === $field;
                     });
                     $where_str = '';
-                    foreach($fields_except as $fe){
-                        $where_str .= '->where("'.$fe.'", $request->'.$fe.'?:" ")';
+                    foreach ($fields_except as $fe)
+                    {
+                        $where_str .= '->where("' . $fe . '", $request->' . $fe . '?:" ")';
                     }
-                    
-                    $uniqueRule .= $where_str.'],';
-                    
+
+                    $uniqueRule .= $where_str . '],';
+
                     //===========================
-                    
+
                     $uniqueRuleUpdate .= "
-            '".$field."' => [Rule::unique('".$table."')";
-                    
+            '" . $field . "' => [Rule::unique('" . $table . "')";
+
                     $fields_except = $fields->reject(function ($value, $key) use($field) {
                         return $value === $field;
                     });
                     $where_str = '';
-                    foreach($fields_except as $fe){
-                        $where_str .= '->where("'.$fe.'", $request->'.$fe.'?:" ")';
+                    foreach ($fields_except as $fe)
+                    {
+                        $where_str .= '->where("' . $fe . '", $request->' . $fe . '?:" ")';
                     }
-                    
-                    $uniqueRuleUpdate .= $where_str . "->ignore(".'$request->id'.")],";
+
+                    $uniqueRuleUpdate .= $where_str . "->ignore(" . '$request->id' . ")],";
                 }
             }
-            
         }
-        
+
         return array_merge($replace, [
             'DummyTableName' => $table,
             'DummySearchCondition' => ltrim($searchCondition),
@@ -319,17 +365,19 @@ class CurdMakeCommand extends GeneratorCommand
             'DummyCreateDefaultValue' => $createDefaultValue,
         ]);
     }
-    
+
     protected function getRowData()
     {
         $modelClass = $this->parseModel($this->option('model'));
         $row = $modelClass::first();
         return $row->toArray();
     }
+
     protected function getRowsData()
     {
         $modelClass = $this->parseModel($this->option('model'));
         $row = $modelClass::limit(2)->get();
         return $row->toArray();
     }
+
 }

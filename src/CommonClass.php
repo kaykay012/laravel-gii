@@ -76,7 +76,7 @@ class CommonClass
         $name = str_replace('Controller', '', $name);
         $arr = explode('\\', $name);
         foreach ($arr as $k => $r) {
-            $arr[$k] = Str::kebab($r);
+            $arr[$k] = Str::camel($r);
         }
         $path_name = join('/', $arr);
         return $path_name;

@@ -4,29 +4,30 @@ namespace kaykay012\laravelgii;
 
 use Illuminate\Console\GeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
+use Illuminate\Support\Str;
 
-class ViewVueMakeCommand extends GeneratorCommand
+class ViewBladeMakeCommand extends GeneratorCommand
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'make:view-vue';
+    protected $name = 'make:view-blade';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new vue view.';
+    protected $description = 'Create a new blade view.';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'VUE View';
+    protected $type = 'Blade View';
     
     protected $table;
     protected $ignore_fields = ['created_at', 'updated_at', 'deleted_at'];
@@ -39,11 +40,13 @@ class ViewVueMakeCommand extends GeneratorCommand
     public function handle()
     {
         $name = $this->getNameInput();
+        $name = trim($name, '/');
+        $name = Str::camel($name);
+//        $path = base_path() . '/.view/blade/' .  $name;
+        $path = config('view.paths')[0];
         
-        $path = base_path() . '/.view/vue/' .  $name;
-        
-        $form = $path  . '/form.vue';
-        $list = $path  . '/list.vue';
+        $form = $path . "/{$name}"  . '/form.blade.php';
+        $list = $path . "/{$name}"  . '/index.blade.php';
         
         // First we will check to see if the class already exists. If it does, we don't want
         // to create the class and overwrite the user's code. So, we will bail out so the
@@ -85,65 +88,10 @@ class ViewVueMakeCommand extends GeneratorCommand
         $this->makeDirectory($list);
         
         $this->files->put($form, $this->buildClass('form'));
-        $this->files->put($list, $this->buildClass('list'));
-
-        $api_url_path = CommonClass::getRoutePathName($name);
-        $functionName = CommonClass::getVueStudlyCase($name);
-        $functionNameLcfirst = lcfirst($functionName);
+        $this->files->put($list, $this->buildClass('index'));
 
         $this->info($this->type."`{$form}` created successfully.");
         $this->info($this->type."`{$list}` created successfully.");
-        
-        
-        if($this->hasOption('apiPre')){
-            $apiPre = $this->option('apiPre').'/';
-        }else{
-            $apiPre = '';
-        }
-        
-        $this->info("
-function {$functionNameLcfirst}List (obj) {
-    return request({
-      url: '{$apiPre}{$api_url_path}/index',
-      method: 'GET',
-      params: obj
-    })
-}");
-      
-        $this->info("
-function create{$functionName} (obj) {
-    return request({
-      url: '{$apiPre}{$api_url_path}/create',
-      method: 'POST',
-      data: obj
-    })
-}");
-      
-        $this->info("
-function edit{$functionName} (obj) {
-    return request({
-      url: '{$apiPre}{$api_url_path}/update',
-      method: 'POST',
-      data: obj
-    })
-}");
-        
-        $this->info("
-function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
-  var data = {
-    url: '{$apiPre}{$api_url_path}/index',
-    method: 'GET',
-    params: obj
-  }
-  if (ext !== false) {
-    Object.assign(data, ext)
-  }
-  if (exportExcel !== false) {
-    Object.assign(data, { responseType: 'blob' })
-    Object.assign(data, ext)
-  }
-  return request(data)
-}");
     }
     
     /**
@@ -158,7 +106,7 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
     {
         $inputName = $this->getNameInput();
         $table = $this->table;
-        $pathName = CommonClass::getVueStudlyCase($inputName);
+        $pathName = trim($inputName, '/');
         $replace['DummyInputPath'] = $inputName;
         $replace['DummyPathNameTitleCase'] = $pathName;
         $replace['DummyPathNameLcfirstTitleCase'] = lcfirst($pathName);//首字母小写
@@ -223,12 +171,24 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
             if(in_array($COLUMN_TYPE, ['integer','numberic'])){
                 $modifier = '.number';
             }
+            //是否允许为空
+            $not_NULLABLE='';
+            if($column->IS_NULLABLE == 'NO'){
+                $not_NULLABLE = ' st-form-input-required';
+            }
             
             /*
              * Form Input default value
              */
-            $str_input .= "
-        {$column->COLUMN_NAME}: {$COLUMN_DEFAULT},";
+            $str_input .= '
+            <div class="layui-form-item">
+                <label class="layui-form-label'.$not_NULLABLE.'">{{$model->getAttributeLabel(\''.$column->COLUMN_NAME.'\')}}</label>
+                <div class="layui-input-block">
+                    <input type="text" name="'.$column->COLUMN_NAME.'" value="{{$model->'.$column->COLUMN_NAME.'}}" autocomplete="off" placeholder="" class="layui-input">
+                    <div class="layui-word-aux st-form-tip st-form-tip-error"></div>
+                </div>
+                <i class="layui-icon layui-icon-help st-form-tip-help"></i>
+            </div>';
             
             // radio
             if(isset($filedsRadio) && in_array($column->COLUMN_NAME, $filedsRadio)){
@@ -299,33 +259,28 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
             
             $html_comment_begin = $html_comment_end = '';
             if($n > 2){
-                $html_comment_begin = '<!-- ';
+                $html_comment_begin = '
+        <!-- ';
                 $html_comment_end = ' -->';
             }
             
             /*
              * search Form Input
              */
-            $str .= "
-        {$html_comment_begin}<el-form-item label=\"{$COLUMN_COMMENT}\">
-          <el-input v-model=\"searchData.{$column->COLUMN_NAME}\" placeholder></el-input>
-        </el-form-item>{$html_comment_end}";
+            $str .= $html_comment_begin;
+            $str .= '<div class="layui-inline">
+            <label class="layui-form-label">{{$model->getAttributeLabel(\''.$column->COLUMN_NAME.'\')}}</label>
+            <div class="layui-input-inline">
+                <input type="text" name="'.$column->COLUMN_NAME.'" autocomplete="off" placeholder="" class="layui-input">
+            </div>
+        </div>';
+            $str .= $html_comment_end;
             
             /*
              *  table list
              */
-            $str_list .= "
-        <el-table-column label=\"{$COLUMN_COMMENT}\" prop=\"{$column->COLUMN_NAME}\" align=\"center\">";
-            // radio
-            if(isset($filedsRadio) && in_array($column->COLUMN_NAME, $filedsRadio)){
-                $str_list .= "
-          <template slot-scope=\"scope\">
-            <span v-if=\"scope.row.{$column->COLUMN_NAME} === 1\">备选项1</span>
-            <span v-else>备选项2</span>
-          </template>";
-            }
-            $str_list .= "
-        </el-table-column>";
+            $str_list .= '
+                , {field: \''.$column->COLUMN_NAME.'\', title: \'{{$model->getAttributeLabel("'.$column->COLUMN_NAME.'")}}\'}';
             
             /*
              * Search Params
@@ -339,7 +294,7 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
         return array_merge($replace, [
             'DummySearchInput' => $str,
             'DummyList' => $str_list,
-            'DummySearchParams' => rtrim($str_search,','),
+//            'DummySearchParams' => rtrim($str_search,','),
         ]);
     }
 
@@ -357,6 +312,6 @@ function {$functionNameLcfirst}List (obj, ext = false, exportExcel = false) {
     
     protected function getView($name)
     {
-        return __DIR__."/view-vue/{$name}.vue";
+        return __DIR__."/view-blade/{$name}.blade.php";
     }
 }

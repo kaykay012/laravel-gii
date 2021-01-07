@@ -17,6 +17,7 @@ class ServiceProvider extends LaravelServiceProvider
             ModelMakeCommand::class,
             ViewVueMakeCommand::class,
             WikiMakeCommand::class,
+            ViewBladeMakeCommand::class,
         ]);
     }
 
@@ -38,6 +39,7 @@ class ServiceProvider extends LaravelServiceProvider
             ModelMakeCommand::class,
             ViewVueMakeCommand::class,
             WikiMakeCommand::class,
+            ViewBladeMakeCommand::class,
         ];
     }
 

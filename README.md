@@ -16,8 +16,10 @@ php artisan make:model-rule Models/User --table=users --cut
 ```
 
 创建 CURD 逻辑
+
+    --blade 创建 laravel blade 模板
 ```
-php artisan make:curd CurdController --model=App\\Models\\User
+php artisan make:curd CurdController --model=App\\Models\\User --blade --force
 ```
 
 创建 api Wiki 文档.
@@ -27,4 +29,9 @@ php artisan make:curd CurdController --model=App\\Models\\User
     --book MinDoc的md_book表主键id (使用此属性表中至少保留一条数据).
 ```
 php artisan make:wiki Admin/CurdController --model=App\\Models\\User --force --doc=article --book=2
+```
+
+创建 laravel blade 模板
+```
+php artisan make:view-blade admin/adminRole --table=admin_role --force
 ```

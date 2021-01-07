@@ -1,0 +1,140 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Http\Request;
+use DummyRootNamespaceHttp\Controllers\Controller;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Carbon;
+use DummyFullModelClass;
+
+class DummyClass extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index(Request $request, DummyModelClass $DummyModelVariable)
+    {
+        if (!$request->ajax() && !$request->pjax())
+        {
+            return $this->view('DummyViewBladeFolder.index', ['model' => $DummyModelVariable]);
+        }
+        $model = DummyModelClass::orderBy('DummyPrimaryKeyName', 'DESC');
+        DummySearchCondition
+        if((isset($request->page) && $request->page <= 0) || $request->export){
+            $rows = $model->get();
+        }else{
+            $rows = $model->paginate($request->limit);
+        }
+        //$rows->makeHidden(['deleted_at']);
+        return ['code' => 200, 'message' => __('admin.Success'), 'data' => $rows];
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => ['required', 'integer', Rule::exists('DummyTableName')],
+        ]);
+        if ($validator->fails()) {
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
+        }
+        $model = DummyModelClass::find($request->id);
+        if($model){
+            return ['code' => 200, 'message' => __('admin.Success'), 'data' => $model];
+        }else{
+            return ['code' => 5001, 'message' => __('admin.Server internal error')];
+        }
+    }
+    
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create(Request $request, DummyModelClass $DummyModelVariable)
+    {
+        if ($request->isMethod('get'))
+        {
+            return $this->view('DummyViewBladeFolder.form', ['model' => $DummyModelVariable]);
+        }
+        $rules = array_merge_recursive($DummyModelVariable->rules(), [DummyUniqueRule
+        ]);
+        $messages = $DummyModelVariable->messages();
+        $customAttributes = $DummyModelVariable->customAttributes();
+        $validator = Validator::make($request->all(), $rules, $messages, $customAttributes);
+        if ($validator->fails()) {
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
+        }
+        $DummyModelVariable->fill($request->all());
+        if($DummyModelVariable->save())
+        {
+            return ['code' => 200, 'message' => __('admin.SuccessCreated'), 'data' => $DummyModelVariable];
+        }else{
+            return ['code' => 5001, 'message' => __('admin.Server internal error')];
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, DummyModelClass $DummyModelVariable)
+    {
+        if ($request->isMethod('get'))
+        {
+            $model = $DummyModelVariable::find($request->id);
+            return $this->view('DummyViewBladeFolder.form', ['model' => $model]);
+        }
+        $rules = array_merge_recursive($DummyModelVariable->rules(), [
+            'id' => ['required', 'integer', Rule::exists('DummyTableName')],DummyUniqueUpdateRule
+        ]);
+        $messages = $DummyModelVariable->messages();
+        $customAttributes = $DummyModelVariable->customAttributes();
+        $validator = Validator::make($request->all(), $rules, $messages, $customAttributes);
+        if ($validator->fails()) {
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
+        }
+        $model = $DummyModelVariable::find($request->id);
+        $model->fill($request->all());
+        if($model->save())
+        {
+            return ['code' => 200, 'message' => __('admin.SuccessUpdated'), 'data' => $model];
+        }else{
+            return ['code' => 5001, 'message' => __('admin.Server internal error')];
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'id' => ['required',],
+        ]);
+        if ($validator->fails()) {
+            return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
+        }
+        $model = DummyModelClass::whereIn('DummyPrimaryKeyName', is_array($request->id) ? $request->id : [$request->id]);
+        if($model->delete()){
+            return ['code' => 200, 'message' => __('admin.SuccessDestroyed')];
+        }else{
+            return ['code' => 5001, 'message' => __('admin.Server internal error')];
+        }
+    }
+}
