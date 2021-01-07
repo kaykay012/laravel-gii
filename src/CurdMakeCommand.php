@@ -193,7 +193,7 @@ class CurdMakeCommand extends GeneratorCommand
     {
         $modelClass = $this->parseModel($this->option('model'));
 
-        if (!class_exists($modelClass))
+        if (!class_exists($modelClass, false))
         {
             if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true))
             {
