@@ -3,13 +3,13 @@
 namespace DummyNamespace;
 
 use Illuminate\Http\Request;
-use DummyRootNamespaceHttp\Controllers\Controller;
+use DummyRootNamespaceHttp\Controllers\Admin\BaseController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Carbon;
 use DummyFullModelClass;
 
-class DummyClass extends Controller
+class DummyClass extends BaseController
 {
     /**
      * Display a listing of the resource.
@@ -22,7 +22,7 @@ class DummyClass extends Controller
         {
             return $this->view('DummyViewBladeFolder.index', ['model' => $DummyModelVariable]);
         }
-        $model = DummyModelClass::orderBy('DummyPrimaryKeyName', 'DESC');
+        $model = DummyModelClass::orderBy(($request->field ?: 'id'), ($request->order ?: 'desc'));
         DummySearchCondition
         if((isset($request->page) && $request->page <= 0) || $request->export){
             $rows = $model->get();

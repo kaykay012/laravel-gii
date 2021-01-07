@@ -73,15 +73,16 @@ class CurdMakeCommand extends GeneratorCommand
 
         $this->info($str);
         $this->info(json_encode($str_json));
-        
-        
+
+
         if ($this->option('blade'))
         {
             $modelClass = $this->parseModel($this->option('model'));
             $this->info("\n");
             $params = ['name' => $url_path, '--table' => (new $modelClass())->getTable()];
-            if($this->option('force')){
-                $params = array_merge($params, ['--force'=>'1']);
+            if ($this->option('force'))
+            {
+                $params = array_merge($params, ['--force' => '1']);
             }
             $this->call('make:view-blade', $params);
         }
@@ -136,8 +137,8 @@ class CurdMakeCommand extends GeneratorCommand
     protected function buildClass($name)
     {
         $controllerNamespace = $this->getNamespace($name);
-        $class = str_replace($controllerNamespace.'\\', '', $name);
-        
+        $class = str_replace($controllerNamespace . '\\', '', $name);
+
         $replace = [];
 
         if ($this->option('parent'))
@@ -167,12 +168,16 @@ class CurdMakeCommand extends GeneratorCommand
     protected function buildParentReplacements()
     {
         $parentModelClass = $this->parseModel($this->option('parent'));
-
         if (!class_exists($parentModelClass))
         {
             if ($this->confirm("A {$parentModelClass} model does not exist. Do you want to generate it?", true))
             {
-                $this->call('make:model', ['name' => $parentModelClass]);
+                $params = ['name' => $parentModelClass];
+                if ($this->option('force'))
+                {
+                    $params = array_merge($params, ['--force' => '1']);
+                }
+                $this->call('make:model', $params);
             }
         }
 
@@ -193,11 +198,16 @@ class CurdMakeCommand extends GeneratorCommand
     {
         $modelClass = $this->parseModel($this->option('model'));
 
-        if (!class_exists($modelClass, false))
+        if (!class_exists($modelClass))
         {
             if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true))
             {
-                $this->call('make:model-rule', ['name' => $modelClass, '--cut' => true]);
+                $params = ['name' => $modelClass, '--cut' => true];
+                if ($this->option('force'))
+                {
+                    $params = array_merge($params, ['--force' => '1']);
+                }
+                $this->call('make:model-rule', $params);
                 $path = CommonClass::getModelPath($modelClass);
                 require_once base_path() . '/app/' . $path . '.php';
             } else
