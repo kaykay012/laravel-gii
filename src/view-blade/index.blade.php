@@ -65,6 +65,9 @@
         var data = layui.form.val(searchFormId);
         tableIns.reload({
             where: data
+            , page: {
+                curr: 1 //重新从第 1 页开始
+            }
         });
     });
     //监听排序事件 
