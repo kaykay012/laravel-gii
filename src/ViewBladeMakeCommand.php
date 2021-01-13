@@ -185,7 +185,7 @@ class ViewBladeMakeCommand extends GeneratorCommand
                 <label class="layui-form-label'.$not_NULLABLE.'">{{$model->getAttributeLabel(\''.$column->COLUMN_NAME.'\')}}</label>
                 <div class="layui-input-block">
                     <input type="text" name="'.$column->COLUMN_NAME.'" value="{{$model->'.$column->COLUMN_NAME.'}}" autocomplete="off" placeholder="" class="layui-input">
-                    <div class="layui-word-aux st-form-tip st-form-tip-error"></div>
+                    <div class="layui-word-aux st-form-tip"></div>
                 </div>
                 <i class="layui-icon layui-icon-help st-form-tip-help"></i>
             </div>';
