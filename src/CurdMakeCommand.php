@@ -54,12 +54,25 @@ class CurdMakeCommand extends GeneratorCommand
         $this->url_path_update = "{$url_path}/update";
         $this->url_path_destroy = "{$url_path}/destroy";
 
+        $index = "Route::any('{$this->url_path_index}', '{$controller_name}@index');";
+        $show = "Route::any('{$this->url_path_show}', '{$controller_name}@show');";
+        $create = "Route::any('{$this->url_path_create}', '{$controller_name}@create');";
+        $update = "Route::any('{$this->url_path_update}', '{$controller_name}@update');";
+        $destroy = "Route::any('{$this->url_path_destroy}', '{$controller_name}@destroy');";
+
+        $route_admin = base_path('routes/admin.php');
+        if (file_exists($route_admin))
+        {
+            $route_str = "\n{$index}\n{$show}\n{$create}\n{$update}\n{$destroy}\n";
+            file_put_contents($route_admin, $route_str, FILE_APPEND);
+        }
+
         $this->info('');
-        $this->info("Route::any('{$this->url_path_index}', '{$controller_name}@index');");
-        $this->info("Route::any('{$this->url_path_show}', '{$controller_name}@show');");
-        $this->info("Route::any('{$this->url_path_create}', '{$controller_name}@create');");
-        $this->info("Route::any('{$this->url_path_update}', '{$controller_name}@update');");
-        $this->info("Route::any('{$this->url_path_destroy}', '{$controller_name}@destroy');");
+        $this->info($index);
+        $this->info($show);
+        $this->info($create);
+        $this->info($update);
+        $this->info($destroy);
         $this->info("\n");
 
         //postman 参数
