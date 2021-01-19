@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class DummyClass extends Model
 {
-    protected $table = 'DummyTableName';
     public $tableComments = 'DummyTableComments';
+    protected $table = 'DummyTableName';
     protected $guarded = [];
     
     /**
