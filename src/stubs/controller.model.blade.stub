@@ -66,7 +66,7 @@ class DummyClass extends BaseController
      */
     public function create(Request $request, DummyModelClass $DummyModelVariable)
     {
-        if ($request->isMethod('get'))
+        if (!$request->expectsJson())
         {
             return $this->view('DummyViewBladeFolder.form', ['model' => $DummyModelVariable]);
         }
@@ -101,7 +101,7 @@ class DummyClass extends BaseController
      */
     public function update(Request $request, DummyModelClass $DummyModelVariable)
     {
-        if ($request->isMethod('get'))
+        if (!$request->expectsJson())
         {
             $model = $DummyModelVariable::find($request->id);
             return $this->view('DummyViewBladeFolder.form', ['model' => $model]);
