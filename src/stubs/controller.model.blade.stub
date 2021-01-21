@@ -20,7 +20,7 @@ class DummyClass extends BaseController
      */
     public function index(Request $request, DummyModelClass $DummyModelVariable)
     {
-        if (!$request->ajax() && !$request->pjax())
+        if (!$request->expectsJson())
         {
             return $this->view('DummyViewBladeFolder.index', ['model' => $DummyModelVariable]);
         }
