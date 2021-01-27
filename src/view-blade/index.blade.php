@@ -23,7 +23,7 @@
         </div>
     </div>
 </form>
-<table class="layui-hide" id="ST-TABLE-LIST" lay-filter="ST-TABLE-LIST" lay-size="sm"></table>
+<table class="layui-hide" id="ST-TABLE-LIST" lay-filter="ST-TABLE-LIST"></table>
 <script type="text/html" id="ST-TOOL-BAR">
     <div class="layui-btn-container st-tool-bar">
         <a class="layui-btn layui-btn-xs" onclick="Util.createFormWindow('/DummyPathNameLcfirstTitleCase/create', this.innerText);">添加</a>
