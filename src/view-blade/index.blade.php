@@ -50,7 +50,7 @@
     //表格字段
     var cols = [
                 {type: 'checkbox', fixed: 'left'}
-                , {field: 'id', title: 'id', width: 80, fixed: 'left', unresize: true, totalRowText: '合计', sort: true}DummyList
+                , {field: 'id', title: 'id', width: 60, fixed: 'left', unresize: true, totalRowText: '合计', sort: true}DummyList
                 , {fixed: 'right', title: '操作', toolbar: '#ST-OP-BUTTON', width: 150}
             ];
     var tableConfig = {
