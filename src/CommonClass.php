@@ -154,7 +154,7 @@ class CommonClass
         $data_type = strtoupper($type);
         $data = [
             'integer' => ['TINYINT', 'SMALLINT', 'MEDIUMINT', 'INTEGER', 'INT', 'BIGINT'],
-            'numberic' => ['FLOAT', 'DOUBLE', 'DECIMAL'],
+            'numeric' => ['FLOAT', 'DOUBLE', 'DECIMAL'],
             'date' => ['DATE', 'DATETIME', 'TIMESTAMP'],
             'time' => ['TIME'],
             'year' => ['YEAR'],
@@ -162,8 +162,8 @@ class CommonClass
         ];
         if (in_array($data_type, $data['integer'])) {
             return 'integer';
-        } elseif (in_array($data_type, $data['numberic'])) {
-            return 'numberic';
+        } elseif (in_array($data_type, $data['numeric'])) {
+            return 'numeric';
         } elseif (in_array($data_type, $data['date'])) {
             return 'date';
         } elseif (in_array($data_type, $data['time'])) {
