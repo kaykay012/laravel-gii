@@ -279,7 +279,7 @@ class ViewBladeMakeCommand extends GeneratorCommand
              *  table list
              */
             $str_list .= '
-                , {field: \''.$column->COLUMN_NAME.'\', title: \'{{$model->getAttributeLabel("'.$column->COLUMN_NAME.'")}}\', width: 150}';
+                , {field: \''.$column->COLUMN_NAME.'\', title: \'{{$model->getAttributeLabel("'.$column->COLUMN_NAME.'")}}\', width: 150, sort: true}';
             
             /*
              * Search Params
