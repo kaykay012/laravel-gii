@@ -7,7 +7,7 @@
 @endpush
 @section('content')
 <div class="st-h15"></div>
-<form class="layui-form st-form-search">
+<form class="layui-form st-form-search" lay-filter="ST-FORM-SEARCH">
     <div class="layui-form-item">DummySearchInput
         <div class="layui-inline">
             <label class="layui-form-label">{{$model->getAttributeLabel('created_at')}}</label>
