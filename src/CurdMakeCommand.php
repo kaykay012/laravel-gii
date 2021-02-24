@@ -54,12 +54,25 @@ class CurdMakeCommand extends GeneratorCommand
         $this->url_path_update = "{$url_path}/update";
         $this->url_path_destroy = "{$url_path}/destroy";
 
+        $index = "Route::any('{$this->url_path_index}', '{$controller_name}@index');";
+        $show = "Route::any('{$this->url_path_show}', '{$controller_name}@show');";
+        $create = "Route::any('{$this->url_path_create}', '{$controller_name}@create');";
+        $update = "Route::any('{$this->url_path_update}', '{$controller_name}@update');";
+        $destroy = "Route::any('{$this->url_path_destroy}', '{$controller_name}@destroy');";
+
+        $route_admin = base_path('routes/admin.php');
+        if (file_exists($route_admin))
+        {
+            $route_str = "\n{$index}\n{$show}\n{$create}\n{$update}\n{$destroy}\n";
+            file_put_contents($route_admin, $route_str, FILE_APPEND);
+        }
+
         $this->info('');
-        $this->info("Route::get('{$this->url_path_index}', '{$controller_name}@index');");
-        $this->info("Route::get('{$this->url_path_show}', '{$controller_name}@show');");
-        $this->info("Route::post('{$this->url_path_create}', '{$controller_name}@create');");
-        $this->info("Route::post('{$this->url_path_update}', '{$controller_name}@update');");
-        $this->info("Route::post('{$this->url_path_destroy}', '{$controller_name}@destroy');");
+        $this->info($index);
+        $this->info($show);
+        $this->info($create);
+        $this->info($update);
+        $this->info($destroy);
         $this->info("\n");
 
         //postman 参数
@@ -73,15 +86,16 @@ class CurdMakeCommand extends GeneratorCommand
 
         $this->info($str);
         $this->info(json_encode($str_json));
-        
-        
+
+
         if ($this->option('blade'))
         {
             $modelClass = $this->parseModel($this->option('model'));
             $this->info("\n");
             $params = ['name' => $url_path, '--table' => (new $modelClass())->getTable()];
-            if($this->option('force')){
-                $params = array_merge($params, ['--force'=>'1']);
+            if ($this->option('force'))
+            {
+                $params = array_merge($params, ['--force' => '1']);
             }
             $this->call('make:view-blade', $params);
         }
@@ -136,8 +150,8 @@ class CurdMakeCommand extends GeneratorCommand
     protected function buildClass($name)
     {
         $controllerNamespace = $this->getNamespace($name);
-        $class = str_replace($controllerNamespace.'\\', '', $name);
-        
+        $class = str_replace($controllerNamespace . '\\', '', $name);
+
         $replace = [];
 
         if ($this->option('parent'))
@@ -167,12 +181,16 @@ class CurdMakeCommand extends GeneratorCommand
     protected function buildParentReplacements()
     {
         $parentModelClass = $this->parseModel($this->option('parent'));
-
         if (!class_exists($parentModelClass))
         {
             if ($this->confirm("A {$parentModelClass} model does not exist. Do you want to generate it?", true))
             {
-                $this->call('make:model', ['name' => $parentModelClass]);
+                $params = ['name' => $parentModelClass];
+                if ($this->option('force'))
+                {
+                    $params = array_merge($params, ['--force' => '1']);
+                }
+                $this->call('make:model', $params);
             }
         }
 
@@ -193,11 +211,16 @@ class CurdMakeCommand extends GeneratorCommand
     {
         $modelClass = $this->parseModel($this->option('model'));
 
-        if (!class_exists($modelClass, false))
+        if (!class_exists($modelClass))
         {
             if ($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true))
             {
-                $this->call('make:model-rule', ['name' => $modelClass, '--cut' => true]);
+                $params = ['name' => $modelClass, '--cut' => true];
+                if ($this->option('force'))
+                {
+                    $params = array_merge($params, ['--force' => '1']);
+                }
+                $this->call('make:model-rule', $params);
                 $path = CommonClass::getModelPath($modelClass);
                 require_once base_path() . '/app/' . $path . '.php';
             } else

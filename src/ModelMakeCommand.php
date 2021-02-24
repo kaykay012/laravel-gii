@@ -60,7 +60,7 @@ class ModelMakeCommand extends GeneratorCommand
         }while(isset($tableAsk) && $tableAsk !== false);
         
         $replace['DummyTableName'] = $table;
-        
+        $replace['DummyTableComments'] = CommonClass::getTableInfo($table);
         $replace = $this->buildRulesReplacements($replace, $table);
         $replace = $this->buildAttributesReplacements($replace, $table);
         

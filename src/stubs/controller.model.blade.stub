@@ -3,26 +3,28 @@
 namespace DummyNamespace;
 
 use Illuminate\Http\Request;
-use DummyRootNamespaceHttp\Controllers\Controller;
+use DummyRootNamespaceHttp\Controllers\Admin\BaseController;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Carbon;
 use DummyFullModelClass;
 
-class DummyClass extends Controller
+class DummyClass extends BaseController
 {
     /**
      * Display a listing of the resource.
      *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request, DummyModelClass $DummyModelVariable)
     {
-        if (!$request->ajax() && !$request->pjax())
+        if (!$request->expectsJson())
         {
             return $this->view('DummyViewBladeFolder.index', ['model' => $DummyModelVariable]);
         }
-        $model = DummyModelClass::orderBy('DummyPrimaryKeyName', 'DESC');
+        $model = DummyModelClass::orderBy(($request->field ?: 'id'), ($request->order ?: 'desc'));
         DummySearchCondition
         if((isset($request->page) && $request->page <= 0) || $request->export){
             $rows = $model->get();
@@ -36,7 +38,7 @@ class DummyClass extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \DummyFullModelClass  $DummyModelVariable
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function show(Request $request)
@@ -57,12 +59,14 @@ class DummyClass extends Controller
     
     /**
      * Store a newly created resource in storage.
-     *
+     * 
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
     public function create(Request $request, DummyModelClass $DummyModelVariable)
     {
-        if ($request->isMethod('get'))
+        if (!$request->expectsJson())
         {
             return $this->view('DummyViewBladeFolder.form', ['model' => $DummyModelVariable]);
         }
@@ -77,7 +81,12 @@ class DummyClass extends Controller
         $DummyModelVariable->fill($request->all());
         if($DummyModelVariable->save())
         {
-            return ['code' => 200, 'message' => __('admin.SuccessCreated'), 'data' => $DummyModelVariable];
+            return [
+                'code' => 200, 
+                'message' => __('admin.SuccessCreated'), 
+                'data' => $DummyModelVariable, 
+                'log' => sprintf('[%s][%s][id:%s]', __('admin.SuccessCreated'), $DummyModelVariable->tableComments, $DummyModelVariable->id)
+            ];
         }else{
             return ['code' => 5001, 'message' => __('admin.Server internal error')];
         }
@@ -92,7 +101,7 @@ class DummyClass extends Controller
      */
     public function update(Request $request, DummyModelClass $DummyModelVariable)
     {
-        if ($request->isMethod('get'))
+        if (!$request->expectsJson())
         {
             $model = $DummyModelVariable::find($request->id);
             return $this->view('DummyViewBladeFolder.form', ['model' => $model]);
@@ -110,7 +119,12 @@ class DummyClass extends Controller
         $model->fill($request->all());
         if($model->save())
         {
-            return ['code' => 200, 'message' => __('admin.SuccessUpdated'), 'data' => $model];
+            return [
+                'code' => 200, 
+                'message' => __('admin.SuccessUpdated'), 
+                'data' => $model, 
+                'log' => sprintf('[%s][%s][id:%s]', __('admin.SuccessUpdated'), $DummyModelVariable->tableComments, $model->id)
+            ];
         }else{
             return ['code' => 5001, 'message' => __('admin.Server internal error')];
         }
@@ -119,10 +133,11 @@ class DummyClass extends Controller
     /**
      * Remove the specified resource from storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  \DummyFullModelClass  $DummyModelVariable
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request, DummyModelClass $DummyModelVariable)
     {
         $validator = Validator::make($request->all(), [
             'id' => ['required',],
@@ -130,9 +145,14 @@ class DummyClass extends Controller
         if ($validator->fails()) {
             return ['code' => 3001, 'message' => $validator->errors()->first(), 'data' => $validator->errors()];
         }
-        $model = DummyModelClass::whereIn('DummyPrimaryKeyName', is_array($request->id) ? $request->id : [$request->id]);
+        $ids = is_array($request->id) ? $request->id : [$request->id];
+        $model = $DummyModelVariable::whereIn('DummyPrimaryKeyName', $ids);
         if($model->delete()){
-            return ['code' => 200, 'message' => __('admin.SuccessDestroyed')];
+            return [
+                'code' => 200, 
+                'message' => __('admin.SuccessDestroyed'), 
+                'log' => sprintf('[%s][%s]『id:%s』', __('admin.SuccessDestroyed'), $DummyModelVariable->tableComments, json_encode($ids))
+            ];
         }else{
             return ['code' => 5001, 'message' => __('admin.Server internal error')];
         }
