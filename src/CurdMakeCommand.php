@@ -55,11 +55,11 @@ class CurdMakeCommand extends GeneratorCommand
         $this->url_path_destroy = "{$url_path}/destroy";
 
         $this->info('');
-        $this->info("Route::any('{$this->url_path_index}', '{$controller_name}@index');");
-        $this->info("Route::any('{$this->url_path_show}', '{$controller_name}@show');");
-        $this->info("Route::any('{$this->url_path_create}', '{$controller_name}@create');");
-        $this->info("Route::any('{$this->url_path_update}', '{$controller_name}@update');");
-        $this->info("Route::any('{$this->url_path_destroy}', '{$controller_name}@destroy');");
+        $this->info("Route::get('{$this->url_path_index}', '{$controller_name}@index');");
+        $this->info("Route::get('{$this->url_path_show}', '{$controller_name}@show');");
+        $this->info("Route::post('{$this->url_path_create}', '{$controller_name}@create');");
+        $this->info("Route::post('{$this->url_path_update}', '{$controller_name}@update');");
+        $this->info("Route::post('{$this->url_path_destroy}', '{$controller_name}@destroy');");
         $this->info("\n");
 
         //postman 参数
