@@ -47,6 +47,7 @@ class ViewBladeMakeCommand extends GeneratorCommand
         
         $form = $path . "/{$name}"  . '/form.blade.php';
         $list = $path . "/{$name}"  . '/index.blade.php';
+        $show = $path . "/{$name}"  . '/show.blade.php';
         
         // First we will check to see if the class already exists. If it does, we don't want
         // to create the class and overwrite the user's code. So, we will bail out so the
@@ -58,6 +59,10 @@ class ViewBladeMakeCommand extends GeneratorCommand
             }
             if($this->files->exists($list)){
                 $this->error($this->type."`{$list}` already exists!");
+                $error =1;                
+            }
+            if($this->files->exists($show)){
+                $this->error($this->type."`{$show}` already exists!");
                 $error =1;                
             }
             if(isset($error)){
@@ -86,12 +91,15 @@ class ViewBladeMakeCommand extends GeneratorCommand
         
         $this->makeDirectory($form);
         $this->makeDirectory($list);
+        $this->makeDirectory($show);
         
         $this->files->put($form, $this->buildClass('form'));
         $this->files->put($list, $this->buildClass('index'));
+        $this->files->put($show, $this->buildClass('show'));
 
         $this->info($this->type."`{$form}` created successfully.");
         $this->info($this->type."`{$list}` created successfully.");
+        $this->info($this->type."`{$show}` created successfully.");
     }
     
     /**
@@ -153,11 +161,25 @@ class ViewBladeMakeCommand extends GeneratorCommand
             $filedsSelect = explode(',',$this->option('select'));
         }
         // rules -------------------------------------
-        $str_input = $str = '';
-        foreach ($columns as $column) {
+        $str_show = $str_input = $str = '';
+        foreach ($columns as $key=>$column) {
             if($primaryKeyName === $column->COLUMN_NAME){
                 continue;
             }
+            if(($key+1)%2 == 0)
+            {
+            $str_show .= '
+        <tr>';
+            }
+            $str_show .='
+            <td><strong>{{$model->getAttributeLabel(\''.$column->COLUMN_NAME.'\')}}</strong></td>
+            <td>{{$model->'.$column->COLUMN_NAME.'}}</td>';
+            if(($key+1)%2 > 0)
+            {
+        $str_show .='
+        </tr>';
+            }
+                    
             if(in_array($column->COLUMN_NAME, $this->ignore_fields)){
                 continue;
             }
@@ -234,6 +256,7 @@ class ViewBladeMakeCommand extends GeneratorCommand
         return array_merge($replace, [
             'DummyRules' => $str,
             'DummyInputParams' => rtrim($str_input,','),
+            'DummyShowParams' => rtrim($str_show,','),
         ]);
     }
     
