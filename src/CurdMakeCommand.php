@@ -281,8 +281,9 @@ class CurdMakeCommand extends GeneratorCommand
 
         $obj = new $modelClass();
         $table = $obj->getTable();
+        $table_db = $obj->getConnectionName() ? "{$obj->getConnectionName()}.{$table}" : $table;
         $primaryKeyName = $obj->getKeyName();
-        $this->columns = $columns = CommonClass::getColumns($table,$obj->getConnectionName());
+        $this->columns = $columns = CommonClass::getColumns($table, $obj->getConnectionName());
 
         // Search Condition
         $createDefaultValue = $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
@@ -332,23 +333,23 @@ class CurdMakeCommand extends GeneratorCommand
             if ($column->COLUMN_KEY === 'UNI')
             {
                 $uniqueRule .= "
-            '{$column->COLUMN_NAME}' => ['unique:{$obj->getConnectionName()}.{$table}'],";
+            '{$column->COLUMN_NAME}' => ['unique:{$table_db}'],";
 
                 $uniqueRuleUpdate .= "
-            '" . $column->COLUMN_NAME . "' => [Rule::unique('" . ($obj->getConnectionName() . '.') . $table . "')->ignore(" . '$request->id' . ")],";
+            '" . $column->COLUMN_NAME . "' => [Rule::unique('" . $table_db . "')->ignore(" . '$request->id' . ")],";
             }
             //多字段唯一索引
             if ($column->COLUMN_KEY === 'MUL')
             {
-                $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME,$obj->getConnectionName());
-                $uniques = CommonClass::getIndexColumns($table, $constraint_name,$obj->getConnectionName());
+                $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME, $obj->getConnectionName());
+                $uniques = CommonClass::getIndexColumns($table, $constraint_name, $obj->getConnectionName());
                 $fields = collect($uniques)->pluck('COLUMN_NAME');
 
                 foreach ($fields as $field)
                 {
 
                     $uniqueRule .= "
-            '" . $field . "' => [Rule::unique('" . ($obj->getConnectionName() . '.') . $table . "')";
+            '" . $field . "' => [Rule::unique('" . $table_db . "')";
 
                     $fields_except = $fields->reject(function ($value, $key) use($field) {
                         return $value === $field;
@@ -364,7 +365,7 @@ class CurdMakeCommand extends GeneratorCommand
                     //===========================
 
                     $uniqueRuleUpdate .= "
-            '" . $field . "' => [Rule::unique('" . ($obj->getConnectionName() . '.') . $table . "')";
+            '" . $field . "' => [Rule::unique('" . $table_db . "')";
 
                     $fields_except = $fields->reject(function ($value, $key) use($field) {
                         return $value === $field;
@@ -381,7 +382,7 @@ class CurdMakeCommand extends GeneratorCommand
         }
 
         return array_merge($replace, [
-            'DummyTableName' => "{$obj->getConnectionName()}.{$table}",
+            'DummyTableName' => "$table_db",
             'DummySearchCondition' => ltrim($searchCondition),
             'DummyPrimaryKeyName' => $primaryKeyName,
             'DummyUniqueRule' => $uniqueRule,

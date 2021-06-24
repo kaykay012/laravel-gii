@@ -27,7 +27,7 @@ class CommonClass
         }
         if (!$connection)
         {
-            $connection = 'mysql';
+            $connection = DB::getDefaultConnection();
         }
         $prefix = config("database.connections.{$connection}.prefix");
         $db = config("database.connections.{$connection}.database");
@@ -43,7 +43,7 @@ class CommonClass
         }
         if (!$connection)
         {
-            $connection = 'mysql';
+            $connection = DB::getDefaultConnection();
         }
         $prefix = config("database.connections.{$connection}.prefix");
         $db = config("database.connections.{$connection}.database");
@@ -75,7 +75,7 @@ class CommonClass
         }
         if (!$connection)
         {
-            $connection = 'mysql';
+            $connection = DB::getDefaultConnection();
         }
         $prefix = config("database.connections.{$connection}.prefix");
         $db = config("database.connections.{$connection}.database");
@@ -97,7 +97,7 @@ class CommonClass
         }
         if (!$connection)
         {
-            $connection = 'mysql';
+            $connection = DB::getDefaultConnection();
         }
         $prefix = config("database.connections.{$connection}.prefix");
         $db = config("database.connections.{$connection}.database");
@@ -170,7 +170,7 @@ class CommonClass
         }
         if (!$connection)
         {
-            $connection = 'mysql';
+            $connection = DB::getDefaultConnection();
         }
         $prefix = config("database.connections.{$connection}.prefix");
         $db = config("database.connections.{$connection}.database");
@@ -187,7 +187,7 @@ class CommonClass
         }
         if (!$connection)
         {
-            $connection = 'mysql';
+            $connection = DB::getDefaultConnection();
         }
         $prefix = config("database.connections.{$connection}.prefix");
         $db = config("database.connections.{$connection}.database");
