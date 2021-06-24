@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class DummyClass extends Model
 {
-    public $tableComments = 'DummyTableComments';
+    public $tableComments = 'DummyTableComments';DummyConnection
     protected $table = 'DummyTableName';
     protected $guarded = ['id', 'created_at', 'updated_at', 'deleted_at'];
     
