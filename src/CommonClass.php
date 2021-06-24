@@ -19,17 +19,34 @@ use Illuminate\Support\Str;
 class CommonClass
 {
 
-    public static function getColumns(string $table)
+    public static function getColumns(string $table, $connection = null, $prefix = null)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
+        if (!$prefix)
+        {
+            $prefix = DB::getConfig('prefix');
+        }
+        if (!$connection)
+        {
+            $connection = 'mysql';
+        }
+        $prefix = config("database.connections.{$connection}.prefix");
+        $db = config("database.connections.{$connection}.database");
         $columns = DB::select("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = '{$db}' AND TABLE_NAME = '{$prefix}{$table}'");
         return $columns;
     }
-    public static function getTableInfo(string $table)
+
+    public static function getTableInfo(string $table, $connection = null, $prefix = null)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
+        if (!$prefix)
+        {
+            $prefix = DB::getConfig('prefix');
+        }
+        if (!$connection)
+        {
+            $connection = 'mysql';
+        }
+        $prefix = config("database.connections.{$connection}.prefix");
+        $db = config("database.connections.{$connection}.database");
         $columns = DB::select("select table_schema, table_name, table_comment from information_schema.tables where table_schema = '{$db}' and table_name = '{$prefix}{$table}';");
         return $columns[0]->table_comment ?: $columns[0]->table_name;
     }
@@ -50,10 +67,18 @@ class CommonClass
      * @param string $column_name
      * @return type
      */
-    public static function getColumnsIndex(string $table, string $column_name)
+    public static function getColumnsIndex(string $table, string $column_name, $connection = null, $prefix = null)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
+        if (!$prefix)
+        {
+            $prefix = DB::getConfig('prefix');
+        }
+        if (!$connection)
+        {
+            $connection = 'mysql';
+        }
+        $prefix = config("database.connections.{$connection}.prefix");
+        $db = config("database.connections.{$connection}.database");
         $columns = DB::select("SELECT * FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = '{$db}' AND `TABLE_NAME` = '{$prefix}{$table}' AND `COLUMN_NAME` = '$column_name';");
         return $columns[0]->CONSTRAINT_NAME ?? '';
     }
@@ -64,10 +89,18 @@ class CommonClass
      * @param string $constraint_name
      * @return type
      */
-    public static function getIndexColumns(string $table, string $constraint_name)
+    public static function getIndexColumns(string $table, string $constraint_name, $connection = null, $prefix = null)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
+        if (!$prefix)
+        {
+            $prefix = DB::getConfig('prefix');
+        }
+        if (!$connection)
+        {
+            $connection = 'mysql';
+        }
+        $prefix = config("database.connections.{$connection}.prefix");
+        $db = config("database.connections.{$connection}.database");
         $columns = DB::select("SELECT * FROM `information_schema`.`KEY_COLUMN_USAGE` WHERE `TABLE_SCHEMA` = '{$db}' AND `TABLE_NAME` = '{$prefix}{$table}' AND `CONSTRAINT_NAME` = '$constraint_name';");
         return $columns;
     }
@@ -82,7 +115,8 @@ class CommonClass
         $name = str_replace('App\\Http\\Controllers\\', '', $name);
         $name = str_replace('Controller', '', $name);
         $arr = explode('\\', $name);
-        foreach ($arr as $k => $r) {
+        foreach ($arr as $k => $r)
+        {
             $arr[$k] = Str::camel($r);
         }
         $path_name = join('/', $arr);
@@ -97,7 +131,8 @@ class CommonClass
     public static function getVueStudlyCase(string $name)
     {
         $arr = explode('/', $name);
-        foreach ($arr as $k => $val) {
+        foreach ($arr as $k => $val)
+        {
             $arr[$k] = snake_case($val);
         }
         $underline_name = join('_', $arr);
@@ -127,19 +162,35 @@ class CommonClass
      * @param string $table
      * @return type
      */
-    public static function getKeyName(string $table)
+    public static function getKeyName(string $table, $connection = null, $prefix = null)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
+        if (!$prefix)
+        {
+            $prefix = DB::getConfig('prefix');
+        }
+        if (!$connection)
+        {
+            $connection = 'mysql';
+        }
+        $prefix = config("database.connections.{$connection}.prefix");
+        $db = config("database.connections.{$connection}.database");
         $row = DB::select("SELECT column_name FROM INFORMATION_SCHEMA.`KEY_COLUMN_USAGE` WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}' AND constraint_name='PRIMARY'");
 
         return $row[0]->column_name ?? null;
     }
 
-    public static function existsTable(string $table)
+    public static function existsTable(string $table, $connection = null, $prefix = null)
     {
-        $prefix = DB::getConfig('prefix');
-        $db = config('database.connections.mysql.database');
+        if (!$prefix)
+        {
+            $prefix = DB::getConfig('prefix');
+        }
+        if (!$connection)
+        {
+            $connection = 'mysql';
+        }
+        $prefix = config("database.connections.{$connection}.prefix");
+        $db = config("database.connections.{$connection}.database");
         $row = DB::select("SELECT table_name FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{$db}' AND table_name='{$prefix}{$table}'");
         return $row[0]->table_name ?? null;
     }
@@ -160,17 +211,23 @@ class CommonClass
             'year' => ['YEAR'],
             'string' => ['CHAR', 'VARCHAR', 'TINYTEXT', 'TEXT', 'LONGTEXT'],
         ];
-        if (in_array($data_type, $data['integer'])) {
+        if (in_array($data_type, $data['integer']))
+        {
             return 'integer';
-        } elseif (in_array($data_type, $data['numeric'])) {
+        } elseif (in_array($data_type, $data['numeric']))
+        {
             return 'numeric';
-        } elseif (in_array($data_type, $data['date'])) {
+        } elseif (in_array($data_type, $data['date']))
+        {
             return 'date';
-        } elseif (in_array($data_type, $data['time'])) {
+        } elseif (in_array($data_type, $data['time']))
+        {
             return 'date_format:H:i:s';
-        } elseif (in_array($data_type, $data['year'])) {
+        } elseif (in_array($data_type, $data['year']))
+        {
             return 'date_format:Y';
-        } else {
+        } else
+        {
             return 'string';
         }
     }
@@ -184,20 +241,27 @@ class CommonClass
     public static function strBefore($subject, $search = null)
     {
         $pun = [' ', ':', '：', '，', ','];
-        if ($search === null) {
+        if ($search === null)
+        {
             $datas = $pun;
-        } else {
-            if (is_string($search)) {
+        } else
+        {
+            if (is_string($search))
+            {
                 $datas[] = $search;
-            } else {
+            } else
+            {
                 $datas = $search;
             }
             $datas = array_merge_recursive($datas, $pun);
         }
-        foreach ($datas as $data) {
-            if (!function_exists('str_before')) {
+        foreach ($datas as $data)
+        {
+            if (!function_exists('str_before'))
+            {
                 $subject = Str::before($subject, $data);
-            } else {
+            } else
+            {
                 $subject = str_before($subject, $data);
             }
         }

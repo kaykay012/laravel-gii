@@ -74,7 +74,7 @@ class ViewBladeMakeCommand extends GeneratorCommand
             $table = $this->option('table');
         }
         do{
-            $exists = CommonClass::existsTable($table);
+            $exists = CommonClass::existsTable($table,$this->option('connection'));
             if (!$exists) {
                 $tableAsk = $this->ask("The table `{$table}` does not exist. Enter table name to regenerate or exit.",'Quit');
                 if($tableAsk === 'Quit'){
@@ -144,12 +144,13 @@ class ViewBladeMakeCommand extends GeneratorCommand
             ['select', null, InputOption::VALUE_OPTIONAL, 'Generate select input.'],
             ['cut', null, InputOption::VALUE_NONE, '缩减`字段注释`(自动删除空格/冒号后面的字符).'],
             ['apiPre', null, InputOption::VALUE_OPTIONAL, 'API url 前缀'],
+            ['connection', null, InputOption::VALUE_OPTIONAL, '数据库连接'],
         ];
     }
     
     protected function buildRulesReplacements(array $replace, $table)
     {
-        $columns = CommonClass::getColumns($table);
+        $columns = CommonClass::getColumns($table,$this->option('connection'));
         $primaryKeyName = $this->getKeyName($table);
         if ($this->option('radio')) {
             $filedsRadio = explode(',',$this->option('radio'));
@@ -322,12 +323,12 @@ class ViewBladeMakeCommand extends GeneratorCommand
 
     public function getKeyName(string $table)
     {
-        return CommonClass::getKeyName($table);
+        return CommonClass::getKeyName($table,$this->option('connection'));
     }
     
     public function existsTable(string $table)
     {
-        return CommonClass::existsTable($table);
+        return CommonClass::existsTable($table,$this->option('connection'));
     }
     
     protected function getStub(){}

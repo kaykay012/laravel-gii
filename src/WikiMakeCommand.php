@@ -133,7 +133,7 @@ class WikiMakeCommand extends GeneratorCommand
         $obj = new $modelClass();
         $table = $obj->getTable();
         $primaryKeyName = $obj->getKeyName();
-        $this->columns = $columns = CommonClass::getColumns($table);
+        $this->columns = $columns = CommonClass::getColumns($table,$obj->getConnectionName());
         
         $path = base_path() . "/.wiki/{$url_path}";
         
@@ -490,6 +490,7 @@ class WikiMakeCommand extends GeneratorCommand
             ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists.'],
             ['doc', 'd', InputOption::VALUE_OPTIONAL, 'Generate mindoc wiki.'],
             ['book', 'b', InputOption::VALUE_OPTIONAL, 'Select a book of mindoc wiki.'],
+            ['connection', null, InputOption::VALUE_OPTIONAL, '数据库连接'],
         ];
     }
 
@@ -500,7 +501,7 @@ class WikiMakeCommand extends GeneratorCommand
         $obj = new $modelClass();
         $table = $obj->getTable();
         $primaryKeyName = $obj->getKeyName();
-        $this->columns = $columns = CommonClass::getColumns($table);
+        $this->columns = $columns = CommonClass::getColumns($table,$obj->getConnectionName());
         
         // Search Condition
         $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
@@ -519,8 +520,8 @@ class WikiMakeCommand extends GeneratorCommand
             }
             //多字段唯一索引
             if($column->COLUMN_KEY === 'MUL'){
-                $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME);
-                $uniques = CommonClass::getIndexColumns($table, $constraint_name);
+                $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME,$obj->getConnectionName());
+                $uniques = CommonClass::getIndexColumns($table, $constraint_name,$obj->getConnectionName());
                 $fields = collect($uniques)->pluck('COLUMN_NAME');
                 
                 foreach ($fields as $field){

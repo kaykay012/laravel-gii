@@ -64,7 +64,7 @@ class CurdMakeCommand extends GeneratorCommand
         if (file_exists($route_admin))
         {
             $route_str = "\n{$index}\n{$show}\n{$create}\n{$update}\n{$destroy}\n";
-            file_put_contents($route_admin, $route_str, FILE_APPEND);
+            //file_put_contents($route_admin, $route_str, FILE_APPEND);
         }
 
         $this->info('');
@@ -271,6 +271,7 @@ class CurdMakeCommand extends GeneratorCommand
             ['parent', 'p', InputOption::VALUE_OPTIONAL, 'Generate a nested resource controller class.'],
             ['force', null, InputOption::VALUE_NONE, 'Create the class even if the model already exists.'],
             ['blade', null, InputOption::VALUE_NONE, 'Create controller for view blade'],
+            ['connection', null, InputOption::VALUE_OPTIONAL, '数据库连接'],
         ];
     }
 
@@ -281,7 +282,7 @@ class CurdMakeCommand extends GeneratorCommand
         $obj = new $modelClass();
         $table = $obj->getTable();
         $primaryKeyName = $obj->getKeyName();
-        $this->columns = $columns = CommonClass::getColumns($table);
+        $this->columns = $columns = CommonClass::getColumns($table,$obj->getConnectionName());
 
         // Search Condition
         $createDefaultValue = $uniqueRuleUpdate = $uniqueRule = $searchCondition = '';
@@ -339,8 +340,8 @@ class CurdMakeCommand extends GeneratorCommand
             //多字段唯一索引
             if ($column->COLUMN_KEY === 'MUL')
             {
-                $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME);
-                $uniques = CommonClass::getIndexColumns($table, $constraint_name);
+                $constraint_name = CommonClass::getColumnsIndex($table, $column->COLUMN_NAME,$obj->getConnectionName());
+                $uniques = CommonClass::getIndexColumns($table, $constraint_name,$obj->getConnectionName());
                 $fields = collect($uniques)->pluck('COLUMN_NAME');
 
                 foreach ($fields as $field)
